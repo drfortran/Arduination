@@ -1,5 +1,7 @@
 /*
-  Web Server
+  Web Multi Thermo
+  Version 1.1
+    - suppression des messages snack bar
  
  A simple web server that shows the value of the analog input pins.
  using an Arduino Wiznet Ethernet shield. 
@@ -119,6 +121,8 @@ void setup() {
     Serial.print("Device " + (String)i + " Address: ");
     printAddress(devices[i]);
     Serial.println();
+    Serial.println(stringPrintAddress(devices[i]));
+    Serial.println();
   }
 
   for (int i = 0; i < devicesFound; i++)
@@ -137,6 +141,20 @@ void printAddress(DeviceAddress deviceAddress)
     if (deviceAddress[i] < 16) Serial.print("0");
     Serial.print(deviceAddress[i], HEX);
   }
+}
+
+// function to print a device address
+String stringPrintAddress(DeviceAddress deviceAddress)
+{
+  String s("");
+  for (uint8_t i = 0; i < 8; i++)
+  {
+    // zero pad the address if necessary
+    if (deviceAddress[i] < 16)
+      s += "0";
+      s += String(deviceAddress[i], HEX);
+  }
+  return s;
 }
 
 // function to print the temperature for a device
@@ -161,11 +179,10 @@ void printResolution(DeviceAddress deviceAddress)
 // main function to print information about a device
 void printData(DeviceAddress deviceAddress)
 {
-  Serial.print("Device Address: ");
-  printAddress(deviceAddress);
-  Serial.print(" ");
-  printTemperature(deviceAddress);
-  Serial.println();
+  server.print(stringPrintAddress(deviceAddress));
+  server.print(",");
+  server.print(printTemperature(deviceAddress));
+  server.print(",");
 }
 
 
@@ -195,6 +212,7 @@ void loop() {
           client.println("<!DOCTYPE HTML>");
           client.println("<html>");
           // output the value of each analog input pin
+          /*
           for (int analogChannel = 0; analogChannel < 6; analogChannel++) {
             int sensorReading = analogRead(analogChannel);
             client.print("analog input ");
@@ -203,6 +221,7 @@ void loop() {
             client.print(sensorReading);
             client.println("<br />");       
           }
+          */
           // ---- BEGIN Handle Thermo  -----------------------------------
           if (devicesFound == 0)
           {
@@ -216,9 +235,11 @@ void loop() {
           // print the device information
           for (int i = 0; i < devicesFound; i++)
           {
+            sent += stringPrintAddress(devices[i]);
+            sent += " ; ";    
             sent += printTemperature(devices[i]);
             if (i != devicesFound - 1)
-              sent += " ";    
+              sent += " ; ";    
           }
         
           client.println(sent);
