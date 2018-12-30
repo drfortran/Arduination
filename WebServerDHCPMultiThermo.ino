@@ -2,6 +2,8 @@
   Web Multi Thermo
   Version 1.1
     - suppression des messages snack bar
+  Version 1.2
+    - client NTP
  
  A simple web server that shows the value of the analog input pins.
  using an Arduino Wiznet Ethernet shield. 
@@ -21,6 +23,7 @@
 #include <Ethernet.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
+#include <NTPClient.h>
 
 // ---- ETHERNET
 
@@ -34,6 +37,10 @@ IPAddress ip(192,168,9,177);
 // with the IP address and port you want to use 
 // (port 80 is default for HTTP):
 EthernetServer server(80);
+
+// ---- NTP
+EthernetUDP ntpUDP;
+NTPClient timeClient(ntpUDP);
 
 // ---- ONE WIRE
 
@@ -93,6 +100,9 @@ void setup() {
   server.begin();
   Serial.print("server is at ");
   Serial.println(Ethernet.localIP());
+
+  // --- NTP
+  timeClient.begin();
 
   // --- THERMO ---
   // Start up the library
@@ -187,6 +197,8 @@ void printData(DeviceAddress deviceAddress)
 
 
 void loop() {
+  timeClient.update();
+  
   // listen for incoming clients
   EthernetClient client = server.available();
   
@@ -233,6 +245,10 @@ void loop() {
           String sent = "";
         
           // print the device information
+          sent += (String)timeClient.getEpochTime();
+          sent += " ; ";
+          sent += timeClient.getFormattedTime();
+          sent += " ; "; 
           for (int i = 0; i < devicesFound; i++)
           {
             sent += stringPrintAddress(devices[i]);
