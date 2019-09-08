@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+    <head>
+        <title>Télécommande</title>
+        <script type="text/javascript">
+            fonction lum(){
+                var xhr = new XMLHttpRequest();
+                xhr.open('GET', 'http://192.168.9.179/?1');
+                xhr.send(null);
+            }
+        </script>
+    </head>
+    <body>
+        <button onclick="lum();">Lumière</button>
+    </body>
+</html>
