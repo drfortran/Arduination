@@ -30,8 +30,8 @@
 // Enter a MAC address and IP address for your controller below.
 // The IP address will be dependent on your local network:
 byte mac[] = { 
-  0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
-IPAddress ip(192,168,9,177);
+  0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xEF };
+IPAddress ip(192,168,0,180);
 
 // Initialize the Ethernet server library
 // with the IP address and port you want to use 
@@ -45,9 +45,9 @@ NTPClient timeClient(ntpUDP);
 // ---- ONE WIRE
 
 /* Broche du bus 1-Wire */
-#define ONE_WIRE_BUS 9
+#define ONE_WIRE_BUS 2
 
-#define TEMPERATURE_PRECISION 8
+#define TEMPERATURE_PRECISION 12
 
 // Setup a oneWire instance to communicate with any OneWire devices (not just Maxim/Dallas temperature ICs)
 OneWire oneWire(ONE_WIRE_BUS);
@@ -58,9 +58,6 @@ DallasTemperature sensors(&oneWire);
 // arrays to hold device addresses
 DeviceAddress devices[10];
 int devicesFound = 0;
-
-
-
 
 void setup() {
   // disable SD SPI
@@ -140,7 +137,6 @@ void setup() {
 
   Serial.println("Setup ended");
 }
-
 
 // function to print a device address
 void printAddress(DeviceAddress deviceAddress)
@@ -238,7 +234,7 @@ void loop() {
           if (devicesFound == 0)
           {
              client.println("No devices found.");
-             return;
+             //return;
           }
           sensors.requestTemperatures();
 
@@ -246,6 +242,8 @@ void loop() {
         
           // print the device information
           sent += (String)timeClient.getEpochTime();
+          sent += " ; ";
+          sent += (String)millis();
           sent += " ; ";
           sent += timeClient.getFormattedTime();
           sent += " ; "; 
@@ -259,6 +257,13 @@ void loop() {
           }
         
           client.println(sent);
+          if (devicesFound == 0)
+          {
+             delay(1);
+             // close the connection:
+             client.stop();
+             return;
+          }
 
           // ---- END Handle Thermo -----------------------------------
           
@@ -279,7 +284,6 @@ void loop() {
     delay(1);
     // close the connection:
     client.stop();
-    Serial.println("client disonnected");
+    Serial.println("client disconnected");
   }
 }
-
