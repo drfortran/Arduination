@@ -24,6 +24,7 @@
 #include <OneWire.h>
 #include <DallasTemperature.h>
 #include <NTPClient.h>
+#include <avr/wdt.h>
 
 // ---- ETHERNET
 
@@ -142,6 +143,7 @@ void setup() {
   delay(1000);
   timeClient.update();
   delay(100);
+  wdt_enable(WDTO_8S);
   Serial.println(F("Setup ended"));
 }
 
@@ -200,6 +202,8 @@ void printData(DeviceAddress deviceAddress)
 
 
 void loop() {
+  wdt_reset();
+
   // listen for incoming clients
   EthernetClient client = server.available();
 
