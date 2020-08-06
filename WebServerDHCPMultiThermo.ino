@@ -30,8 +30,8 @@
 // Enter a MAC address and IP address for your controller below.
 // The IP address will be dependent on your local network:
 byte mac[] = {
-  0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xEF };
-IPAddress ip(192,168,0,180);
+  0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
+IPAddress ip(192,168,9,177);
 
 // Initialize the Ethernet server library
 // with the IP address and port you want to use
@@ -74,17 +74,17 @@ void setup() {
   // Ethernet.begin(mac, ip);
   // start the Ethernet connection:
   // DHCP version
-  Serial.println("Initialize Ethernet with DHCP:");
+  Serial.println(F("Initialize Ethernet with DHCP:"));
   if (1 == 1)
       Ethernet.begin(mac, ip);
   else
     if (Ethernet.begin(mac) == 0) {
-      Serial.println("Failed to configure Ethernet using DHCP");
+      Serial.println(F("Failed to configure Ethernet using DHCP"));
       Ethernet.begin(mac, ip);
       //if (Ethernet.hardwareStatus() == EthernetNoHardware) {
-      //  Serial.println("Ethernet shield was not found.  Sorry, can't run without hardware. :(");
+      //  Serial.println(F("Ethernet shield was not found.  Sorry, can't run without hardware. :("));
       //}// else if (Ethernet.linkStatus() == LinkOFF) {
-      //  Serial.println("Ethernet cable is not connected.");
+      //  Serial.println(F("Ethernet cable is not connected."));
       //}
       // no point in carrying on, so do nothing forevermore:
       //while (true) {
@@ -95,7 +95,7 @@ void setup() {
   delay(1000);
   // print your local IP address:
   server.begin();
-  Serial.print("server is at ");
+  Serial.print(F("server is at "));
   Serial.println(Ethernet.localIP());
 
   // --- NTP
@@ -106,26 +106,30 @@ void setup() {
   sensors.begin();
 
   // locate devices on the bus
-  Serial.print("Locating devices...");
-  Serial.print("Found ");
+  Serial.print(F("Locating devices..."));
+  Serial.print(F("Found "));
   Serial.print(sensors.getDeviceCount(), DEC);
-  Serial.println(" devices.");
+  Serial.println(F(" devices."));
 
   devicesFound = sensors.getDeviceCount();
 
   // report parasite power requirements
-  Serial.print("Parasite power is: ");
+  Serial.print(F("Parasite power is: "));
   if (sensors.isParasitePowerMode()) Serial.println("ON");
-  else Serial.println("OFF");
+  else Serial.println(F("OFF"));
 
   for (int i = 0; i < devicesFound; i++)
-    if (!sensors.getAddress(devices[i], i))
-      Serial.println("Unable to find address for Device" + i);
+    if (!sensors.getAddress(devices[i], i)) {
+      Serial.print(F("Unable to find address for Device"));
+      Serial.println((String) i);
+    }
 
   // show the addresses we found on the bus
   for (int i = 0; i < devicesFound; i++)
   {
-    Serial.print("Device " + (String)i + " Address: ");
+    Serial.print(F("Device "));
+    Serial.print((String)i);
+    Serial.print(F(" Address: "));
     printAddress(devices[i]);
     Serial.println();
     Serial.println(stringPrintAddress(devices[i]));
@@ -135,7 +139,7 @@ void setup() {
   for (int i = 0; i < devicesFound; i++)
     sensors.setResolution(devices[i], TEMPERATURE_PRECISION);
 
-  Serial.println("Setup ended");
+  Serial.println(F("Setup ended"));
 }
 
 // function to print a device address
@@ -176,7 +180,7 @@ String printTemperature(DeviceAddress deviceAddress)
 // function to print a device's resolution
 void printResolution(DeviceAddress deviceAddress)
 {
-  Serial.print("Resolution: ");
+  Serial.print(F("Resolution: "));
   Serial.print(sensors.getResolution(deviceAddress));
   Serial.println();
 }
@@ -212,13 +216,13 @@ void loop() {
         // so you can send a reply
         if (c == '\n' && currentLineIsBlank) {
           // send a standard http response header
-          client.println("HTTP/1.1 200 OK");
-          client.println("Content-Type: text/html");
-          client.println("Connection: close");  // the connection will be closed after completion of the response
-	  client.println("Refresh: 5");  // refresh the page automatically every 5 sec
+          client.println(F("HTTP/1.1 200 OK"));
+          client.println(F("Content-Type: text/html"));
+          client.println(F("Connection: close"));  // the connection will be closed after completion of the response
+	  client.println(F("Refresh: 5"));  // refresh the page automatically every 5 sec
           client.println();
-          client.println("<!DOCTYPE HTML>");
-          client.println("<html>");
+          client.println(F("<!DOCTYPE HTML>"));
+          client.println(F("<html>"));
           // output the value of each analog input pin
           /*
           for (int analogChannel = 0; analogChannel < 6; analogChannel++) {
@@ -233,7 +237,7 @@ void loop() {
           // ---- BEGIN Handle Thermo  -----------------------------------
           if (devicesFound == 0)
           {
-             client.println("No devices found.");
+             client.println(F("No devices found."));
              //return;
           }
           sensors.requestTemperatures();
@@ -267,7 +271,7 @@ void loop() {
 
           // ---- END Handle Thermo -----------------------------------
 
-          client.println("</html>");
+          client.println(F("</html>"));
           break;
         }
         if (c == '\n') {
@@ -284,6 +288,6 @@ void loop() {
     delay(1);
     // close the connection:
     client.stop();
-    Serial.println("client disconnected");
+    Serial.println(F("client disconnected"));
   }
 }
