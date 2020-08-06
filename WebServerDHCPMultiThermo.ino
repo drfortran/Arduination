@@ -142,6 +142,7 @@ void setup() {
 
   delay(1000);
   timeClient.update();
+  timeClient.setUpdateInterval(3600);
   delay(100);
   wdt_enable(WDTO_8S);
   Serial.println(F("Setup ended"));
