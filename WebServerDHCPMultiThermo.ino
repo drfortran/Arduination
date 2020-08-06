@@ -4,19 +4,19 @@
     - suppression des messages snack bar
   Version 1.2
     - client NTP
- 
+
  A simple web server that shows the value of the analog input pins.
- using an Arduino Wiznet Ethernet shield. 
- 
+ using an Arduino Wiznet Ethernet shield.
+
  Circuit:
  * Ethernet shield attached to pins 10, 11, 12, 13
  * Analog inputs attached to pins A0 through A5 (optional)
- 
+
  created 18 Dec 2009
  by David A. Mellis
  modified 9 Apr 2012
  by Tom Igoe
- 
+
  */
 
 #include <SPI.h>
@@ -29,12 +29,12 @@
 
 // Enter a MAC address and IP address for your controller below.
 // The IP address will be dependent on your local network:
-byte mac[] = { 
+byte mac[] = {
   0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xEF };
 IPAddress ip(192,168,0,180);
 
 // Initialize the Ethernet server library
-// with the IP address and port you want to use 
+// with the IP address and port you want to use
 // (port 80 is default for HTTP):
 EthernetServer server(80);
 
@@ -52,7 +52,7 @@ NTPClient timeClient(ntpUDP);
 // Setup a oneWire instance to communicate with any OneWire devices (not just Maxim/Dallas temperature ICs)
 OneWire oneWire(ONE_WIRE_BUS);
 
-// Pass our oneWire reference to Dallas Temperature. 
+// Pass our oneWire reference to Dallas Temperature.
 DallasTemperature sensors(&oneWire);
 
 // arrays to hold device addresses
@@ -75,7 +75,7 @@ void setup() {
   // start the Ethernet connection:
   // DHCP version
   Serial.println("Initialize Ethernet with DHCP:");
-  if (1 == 1) 
+  if (1 == 1)
       Ethernet.begin(mac, ip);
   else
     if (Ethernet.begin(mac) == 0) {
@@ -110,21 +110,21 @@ void setup() {
   Serial.print("Found ");
   Serial.print(sensors.getDeviceCount(), DEC);
   Serial.println(" devices.");
-  
+
   devicesFound = sensors.getDeviceCount();
-  
+
   // report parasite power requirements
-  Serial.print("Parasite power is: "); 
+  Serial.print("Parasite power is: ");
   if (sensors.isParasitePowerMode()) Serial.println("ON");
   else Serial.println("OFF");
 
   for (int i = 0; i < devicesFound; i++)
-    if (!sensors.getAddress(devices[i], i)) 
-      Serial.println("Unable to find address for Device" + i); 
+    if (!sensors.getAddress(devices[i], i))
+      Serial.println("Unable to find address for Device" + i);
 
   // show the addresses we found on the bus
   for (int i = 0; i < devicesFound; i++)
-  {    
+  {
     Serial.print("Device " + (String)i + " Address: ");
     printAddress(devices[i]);
     Serial.println();
@@ -178,7 +178,7 @@ void printResolution(DeviceAddress deviceAddress)
 {
   Serial.print("Resolution: ");
   Serial.print(sensors.getResolution(deviceAddress));
-  Serial.println();    
+  Serial.println();
 }
 
 
@@ -194,11 +194,11 @@ void printData(DeviceAddress deviceAddress)
 
 void loop() {
   timeClient.update();
-  
+
   // listen for incoming clients
   EthernetClient client = server.available();
-  
-  
+
+
   if (client) {
     Serial.println("new client");
     // an http request ends with a blank line
@@ -227,7 +227,7 @@ void loop() {
             client.print(analogChannel);
             client.print(" is ");
             client.print(sensorReading);
-            client.println("<br />");       
+            client.println("<br />");
           }
           */
           // ---- BEGIN Handle Thermo  -----------------------------------
@@ -239,23 +239,23 @@ void loop() {
           sensors.requestTemperatures();
 
           String sent = "";
-        
+
           // print the device information
           sent += (String)timeClient.getEpochTime();
           sent += " ; ";
           sent += (String)millis();
           sent += " ; ";
           sent += timeClient.getFormattedTime();
-          sent += " ; "; 
+          sent += " ; ";
           for (int i = 0; i < devicesFound; i++)
           {
             sent += stringPrintAddress(devices[i]);
-            sent += " ; ";    
+            sent += " ; ";
             sent += printTemperature(devices[i]);
             if (i != devicesFound - 1)
-              sent += " ; ";    
+              sent += " ; ";
           }
-        
+
           client.println(sent);
           if (devicesFound == 0)
           {
@@ -266,14 +266,14 @@ void loop() {
           }
 
           // ---- END Handle Thermo -----------------------------------
-          
+
           client.println("</html>");
           break;
         }
         if (c == '\n') {
           // you're starting a new line
           currentLineIsBlank = true;
-        } 
+        }
         else if (c != '\r') {
           // you've gotten a character on the current line
           currentLineIsBlank = false;
