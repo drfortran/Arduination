@@ -139,6 +139,9 @@ void setup() {
   for (int i = 0; i < devicesFound; i++)
     sensors.setResolution(devices[i], TEMPERATURE_PRECISION);
 
+  delay(1000);
+  timeClient.update();
+  delay(100);
   Serial.println(F("Setup ended"));
 }
 
@@ -197,8 +200,6 @@ void printData(DeviceAddress deviceAddress)
 
 
 void loop() {
-  timeClient.update();
-
   // listen for incoming clients
   EthernetClient client = server.available();
 
@@ -219,7 +220,6 @@ void loop() {
           client.println(F("HTTP/1.1 200 OK"));
           client.println(F("Content-Type: text/html"));
           client.println(F("Connection: close"));  // the connection will be closed after completion of the response
-	  client.println(F("Refresh: 5"));  // refresh the page automatically every 5 sec
           client.println();
           client.println(F("<!DOCTYPE HTML>"));
           client.println(F("<html>"));
