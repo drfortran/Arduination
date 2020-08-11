@@ -26,6 +26,8 @@
 #include <NTPClient.h>
 #include <avr/wdt.h>
 
+const uint32_t SERIAL_SPEED        = 9600; ///< Set the baud rate for Serial I/O
+
 // ---- ETHERNET
 
 // Enter a MAC address and IP address for your controller below.
@@ -64,9 +66,12 @@ void setup() {
   // disable SD SPI
   pinMode(4,OUTPUT);
   digitalWrite(4,HIGH);
- // Open serial communications and wait for port to open:
-  Serial.begin(9600);
-   while (!Serial) {
+  // Open serial communications and wait for port to open:
+  Serial.begin(SERIAL_SPEED);
+#ifdef  __AVR_ATmega32U4__  // If this is a 32U4 processor, then wait for the serial interface to initialize
+  delay(3000);
+#endif
+  while (!Serial) {
     ; // wait for serial port to connect. Needed for Leonardo only
   }
   //Serial.print("Startup reason:");Serial.println(ESP.getResetReason());
