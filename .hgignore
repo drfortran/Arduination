@@ -1,0 +1,25 @@
+# use glob syntax.
+syntax: glob
+
+.hgignore
+*.mod
+*~
+*.o
+*.so
+*.dll
+*.exe
+build
+dist
+*.zip
+\#*\#
+.\#*
+*.smb
+*.out
+libraries
+*.tbz
+*.xz
+
+# Default ignored files
+.idea/workspace.xml
+*.gcno
+*.gcda
