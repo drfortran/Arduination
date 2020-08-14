@@ -31,7 +31,8 @@
 // pin used for Ethernet chip SPI chip select
 #define PIN_ETH_SPI   10
 
-const uint32_t SERIAL_SPEED        = 115200; ///< Set the baud rate for Serial I/O
+//const uint32_t SERIAL_SPEED        = 115200; ///< Set the baud rate for Serial I/O
+const uint32_t SERIAL_SPEED        = 9600; ///< Set the baud rate for Serial I/O
 
 long log_time_ms = 15000; // how often to log data in milliseconds
 long prev_log_time = 0;   // previous time log occurred
@@ -50,26 +51,41 @@ void setup() {
   // deselect Ethernet chip on SPI bus
   pinMode(PIN_ETH_SPI, OUTPUT);
   digitalWrite(PIN_ETH_SPI, HIGH);
-  
 
   // Open serial communications and wait for port to open:
   Serial.begin(SERIAL_SPEED);       // for debugging
 #ifdef  __AVR_ATmega32U4__  // If this is a 32U4 processor, then wait for the serial interface to initialize
   delay(3000);
 #endif
-  
+
   if (!SD.begin(4)) {
+    Serial.println(F("SD card initialization failed! Things to check:"));
+    Serial.println(F("1. is a card inserted?"));
+    Serial.println(F("2. is your wiring correct?"));
+    Serial.println(F("3. did you change the chipSelect pin to match your shield or module?"));
+    Serial.println(F("Note: press reset or reopen this serial monitor after fixing your issue!"));
     return;  // SD card initialization failed
   }
 
+  Serial.println(F("Initialize Ethernet without DHCP:"));
   Ethernet.begin((uint8_t*)mac, ip, gateway, subnet);
+  delay(1000);
   server.begin();  // start listening for clients
+  Serial.print(F("server is at "));
+  Serial.println(Ethernet.localIP());
+  for (byte thisByte = 0; thisByte < 4; thisByte++) {
+    // print the value of each byte of the IP address:
+    Serial.print(Ethernet.localIP()[thisByte], DEC);
+    Serial.print(F("."));
+  }
+  Serial.println();
 }
 
 void loop() {
   // if an incoming client connects, there will be bytes available to read:
   EthernetClient client = server.available();
   if (client) {
+    Serial.println(F("new client"));
     while (client.connected()) {
       if (ServiceClient(&client)) {
         // received request from client and finished responding
@@ -112,14 +128,14 @@ bool ServiceClient(EthernetClient *client)
   char http_req_type = 0;
   char req_file_type = FT_INVALID;
   const char *file_types[] = {"text/html", "image/x-icon", "text/css", "application/javascript", "image/jpeg", "image/png", "image/gif", "text/plain"};
-  
+
   static char req_line_1[40] = {0};  // stores the first line of the HTTP request
   static unsigned char req_line_index = 0;
   static bool got_line_1 = false;
 
   if (client->available()) {   // client data available to read
     cl_char = client->read();
-    
+
     if ((req_line_index < 39) && (got_line_1 == false)) {
       if ((cl_char != '\r') && (cl_char != '\n')) {
         req_line_1[req_line_index] = cl_char;
@@ -130,7 +146,7 @@ bool ServiceClient(EthernetClient *client)
         req_line_1[39] = 0;
       }
     }
-    
+
     if ((cl_char == '\n') && currentLineIsBlank) {
       // get HTTP request type, file name and file extension type index
       http_req_type = GetRequestedHttpResource(req_line_1, file_name, &req_file_type);
@@ -190,9 +206,9 @@ char GetRequestedHttpResource(char *req_line, char *file_name, char *file_type)
 {
   char request_type = HTTP_invalid;  // 1 = GET, 2 = POST. 0 = invalid
   char *str_token;
-  
+
   *file_type = FT_INVALID;
-  
+
   str_token =  strtok(req_line, " ");    // get the request type
   if (strcmp(str_token, "GET") == 0) {
     request_type = HTTP_GET;
@@ -207,7 +223,7 @@ char GetRequestedHttpResource(char *req_line, char *file_name, char *file_type)
       // get the file extension
       str_token = strtok(str_token, ".");
       str_token = strtok(NULL, ".");
-      
+
       if      (strcmp(str_token, "htm") == 0) {*file_type = 0;}
       else if (strcmp(str_token, "ico") == 0) {*file_type = 1;}
       else if (strcmp(str_token, "css") == 0) {*file_type = 2;}
