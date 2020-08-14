@@ -25,6 +25,9 @@
 #include <DallasTemperature.h>
 #include <NTPClient.h>
 #include <avr/wdt.h>
+#ifndef NO_RTC
+#include <DS3231M.h> // Include the DS3231M RTC library
+#endif
 
 const uint32_t SERIAL_SPEED        = 9600; ///< Set the baud rate for Serial I/O
 
@@ -34,12 +37,16 @@ const uint32_t SERIAL_SPEED        = 9600; ///< Set the baud rate for Serial I/O
 // The IP address will be dependent on your local network:
 byte mac[] = {
   0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
-IPAddress ip(192,168,9,177);
+IPAddress ip(192,168,9,182);
 
 // Initialize the Ethernet server library
 // with the IP address and port you want to use
 // (port 80 is default for HTTP):
 EthernetServer server(80);
+
+#ifndef NO_RTC
+DS3231M_Class DS3231M;                          ///< Create an instance of the DS3231M Class
+#endif
 
 // ---- NTP
 EthernetUDP ntpUDP;
@@ -104,6 +111,16 @@ void setup() {
   Serial.print(F("server is at "));
   Serial.println(Ethernet.localIP());
 
+#ifndef NO_RTC
+  // Initialize communications with the RTC
+  while (!DS3231M.begin())
+  {
+    Serial.println(F("Unable to find DS3231MM. Checking again in 3s."));
+    delay(3000);
+  } // of loop until device is located
+  Serial.println(F("DS3231M initialized."));
+#endif
+
   // --- NTP
   timeClient.begin();
 
@@ -149,6 +166,10 @@ void setup() {
   timeClient.update();
   timeClient.setUpdateInterval(3600);
   delay(100);
+#ifndef NO_RTC
+    DS3231M.adjust(DateTime((uint32_t) timeClient.getEpochTime())); // Set to library compile Date/Time
+    Serial.print(F("Date/Time set to NTP time: "));
+#endif
   wdt_enable(WDTO_8S);
   Serial.println(F("Setup ended"));
 }
@@ -254,8 +275,21 @@ void loop() {
 
           String sent = "";
 
+          unsigned long NTP_Time = timeClient.getEpochTime();
+#ifndef NO_RTC
+          DateTime RTC_now = DS3231M.now(); // get the current time
+          unsigned long RTC_Time = RTC_now.unixtime();
+          Serial.print((String)RTC_Time);
+          Serial.print(F(" ~ "));
+          Serial.print((String)NTP_Time);
+          Serial.println(F(" ; "));
+
+          sent += (String)RTC_Time;
+          sent += " ; ";
+#endif
+
           // print the device information
-          sent += (String)timeClient.getEpochTime();
+          sent += (String)NTP_Time;
           sent += " ; ";
           sent += (String)millis();
           sent += " ; ";
