@@ -9,6 +9,9 @@
 #include <SPI.h>
 #include <Ethernet.h>
 #include <SD.h>
+#ifndef NO_RTC
+#include <DS3231M.h> // Include the DS3231M RTC library
+#endif
 
 // maximum length of file name including path
 #define FILE_NAME_LEN  20
@@ -47,6 +50,10 @@ const byte gateway[] PROGMEM = { 192, 168, 9, 1 };
 const byte subnet[] PROGMEM = { 255, 255, 255, 0 };
 EthernetServer server(80);
 
+#ifndef NO_RTC
+DS3231M_Class DS3231M;                          ///< Create an instance of the DS3231M Class
+#endif
+
 void setup() {
   // deselect Ethernet chip on SPI bus
   pinMode(PIN_ETH_SPI, OUTPUT);
@@ -57,6 +64,9 @@ void setup() {
 #ifdef  __AVR_ATmega32U4__  // If this is a 32U4 processor, then wait for the serial interface to initialize
   delay(3000);
 #endif
+  while (!Serial) {
+    ; // wait for serial port to connect. Needed for Leonardo only
+  }
 
   if (!SD.begin(4)) {
     Serial.println(F("SD card initialization failed! Things to check:"));
@@ -79,6 +89,16 @@ void setup() {
     Serial.print(F("."));
   }
   Serial.println();
+
+#ifndef NO_RTC
+  // Initialize communications with the RTC
+  while (!DS3231M.begin())
+  {
+    Serial.println(F("Unable to find DS3231MM. Checking again in 3s."));
+    delay(3000);
+  } // of loop until device is located
+  Serial.println(F("DS3231M initialized."));
+#endif
 }
 
 void loop() {
@@ -107,11 +127,23 @@ void LogData(void)
   current_time = millis();  // get the current time in milliseconds
   if ((current_time - prev_log_time) > log_time_ms) {
     prev_log_time = current_time;
+#ifndef NO_RTC
+    DateTime RTC_now = DS3231M.now(); // get the current time
+    unsigned long RTC_Time = RTC_now.unixtime();
+//    Serial.print((String)RTC_Time);
+//    Serial.print(F(" ~ "));
+//    Serial.print((String)NTP_Time);
+//    Serial.println(F(" ; "));
+#endif
     // the log time has elapsed, so log another set of data
     logFile = SD.open("log.txt", FILE_WRITE);
     if (logFile) {
       logFile.print(current_time);
-      logFile.print(" = ");
+      logFile.print(" ; ");
+#ifndef NO_RTC
+      logFile.print(RTC_Time);
+      logFile.print(" ; ");
+#endif
       logFile.println(analogRead(5)); // log the analog pin value
       logFile.close();
     }
