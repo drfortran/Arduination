@@ -30,8 +30,8 @@ void setup(){
     Serial.print("Arduino connecte: ");
     Serial.print("server is at ");
     Serial.println(Ethernet.localIP());
-}  
- 
+}
+
 void loop(){
     enAttente();
     if(digitalRead(6) == LOW && eBouton){
