@@ -44,10 +44,10 @@ void setup () {
 #ifndef NO_RTC
   // Initialize communications with the RTC
   while (!DS3231M.begin ())
-  {
-    Serial.println (F ("Unable to find DS3231MM. Checking again in 3s."));
-    delay (3000);
-  } // of loop until device is located
+    {
+      Serial.println (F ("Unable to find DS3231MM. Checking again in 3s."));
+      delay (3000);
+    } // of loop until device is located
   Serial.println (F ("DS3231M initialized."));
 #endif
 }
@@ -55,8 +55,7 @@ void setup () {
 void loop () {
   long unsigned int delta = millis () - lastPress;
   long unsigned int current_micro, delta_micro;
-  if (delta > debounceTime && optoFlag)
-  {
+  if (delta > debounceTime && optoFlag) {
 #ifndef NO_RTC
     DateTime RTC_now = DS3231M.now (); // get the current time
     optoFlag = 0;
@@ -67,8 +66,7 @@ void loop () {
     nextToLastPress = lastPress;
     lastPress = millis ();   //update lastPress
     long unsigned int deltaPress= lastPress - nextToLastPress;
-    if (digitalRead (optoPin) == 0 && lastOptoState == 1)    //if button is pressed and was released last change
-    {
+    if (digitalRead (optoPin) == 0 && lastOptoState == 1) {  // if button is pressed and was released last change
       toggleState =! toggleState;                 //toggle the LED state
       current_micro = micros ();
       delta_micro = (current_micro - lastOpto);
@@ -94,9 +92,7 @@ void loop () {
 
       lastOptoState = 0;    //record the lastButtonState
     }
-
-    else if (digitalRead (optoPin) == 1 && lastOptoState == 0)    //if button is not pressed, and was pressed last change
-    {
+    else if (digitalRead (optoPin) == 1 && lastOptoState == 0) {  // if button is not pressed, and was pressed last change
       current_micro = micros ();
       delta_micro = (current_micro - lastOpto);
       delta_micro = (lastOpto - nextToLastOpto);
