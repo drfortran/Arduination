@@ -11,7 +11,7 @@ EthernetServer server (80);
 int in1 = 7;
 bool hasBeenDisplayed = false;
 
-void setup (){
+void setup () {
   Serial.begin (9600);
   while (!Serial) {
     ; // wait for serial port to connect. Needed for Leonardo only
@@ -32,24 +32,24 @@ void setup (){
   Serial.println (Ethernet.localIP ());
 }
 
-void loop (){
+void loop () {
   enAttente ();
-  if (digitalRead (6) == LOW && eBouton){
+  if (digitalRead (6) == LOW && eBouton) {
     lChambre = !lChambre;
     digitalWrite (in1, lChambre);
     delay (300); // Ce délai est nécessaire sinon chaque fois vous appuyez, Arduino en compte 2 appuis
   }
 }
 
-void enAttente (){
+void enAttente () {
   // Serial.print ("Arduino loop... ");
   EthernetClient client = server.available ();
-  if (client){
+  if (client) {
     boolean currentLineIsBlank = true;
     boolean sentHeader = false;
-    while (client.connected ()){
-      if (client.available ()){
-        if (!sentHeader){
+    while (client.connected ()) {
+      if (client.available ()) {
+        if (!sentHeader) {
           Serial.println ("HTTP/1.1 200 OK");
           client.println ("HTTP/1.1 200 OK");
           client.println ("Content-Type: text/html; charset=utf-8");
@@ -57,11 +57,11 @@ void enAttente (){
           sentHeader = true;
         }
         char c = client.read ();
-        if (reading && c == ' '){reading = false;}
-        if (c == '?'){reading = true;}
-        if (reading){
+        if (reading && c == ' ') {reading = false;}
+        if (c == '?') {reading = true;}
+        if (reading) {
           Serial.print (c);
-          switch (c){
+          switch (c) {
           case '1':
             //                            lChambre = !lChambre;
             lChambre = 0;
@@ -109,10 +109,10 @@ void enAttente (){
             hasBeenDisplayed = true;
           }
         }
-        if (c == '\n' && currentLineIsBlank){break;}
-        if (c == '\n'){
+        if (c == '\n' && currentLineIsBlank) {break;}
+        if (c == '\n') {
           currentLineIsBlank = true;
-        }else if (c != '\r'){
+        }else if (c != '\r') {
           currentLineIsBlank = false;
         }
       }
