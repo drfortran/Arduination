@@ -38,10 +38,8 @@ void setup() {
   Serial.println ("Gestion des Interruptions: @ " + (String) micros () + " µs");
 
   // setup pin mode
-  // pinMode (optoPin, INPUT_PULLUP);
   pinMode (optoPin, INPUT);
   attachInterrupt (digitalPinToInterrupt (optoPin), ISR_button, CHANGE);
-  //attachInterrupt (digitalPinToInterrupt (optoPin), ISR_button, RISING);
 
 #ifndef NO_RTC
   // Initialize communications with the RTC
@@ -63,10 +61,6 @@ void loop() {
     DateTime RTC_now = DS3231M.now(); // get the current time
     optoFlag = 0;
     unsigned long RTC_Time = RTC_now.unixtime();
-//    Serial.print ((String)RTC_Time);
-//    Serial.print (F(" "));
-//    Serial.print ((String) lastOpto);
-//    Serial.println (F("µs ~ "));
 #endif
     optoFlag = 0;
     long unsigned int deltaPress0= lastPress - nextToLastPress;
@@ -82,28 +76,6 @@ void loop() {
       Start_Time = RTC_Time;
       Start_Milli = millis();
       Start_Micro = lastOpto;
-//      Serial.print (F("Start Time: "));
-//      Serial.println ((String) Start_Time);
-//      Serial.print (F("AntiDelta Time: "));
-//      Serial.println ((String) (Start_Time-Stop_Time));
-//      Serial.println ((String) (Start_Milli-Stop_Milli));
-//      Serial.println ((String) (Start_Micro-Stop_Micro));
-//      Serial.print (F("ON: "));
-//      Serial.print ((String) toggleState);
-//      Serial.print (F(" @ "));
-//      Serial.print ((String) current_micro);
-//      Serial.print (F("µs > "));
-//      Serial.print ((String) lastOpto);
-//      Serial.print (F("µs ~ "));
-//      Serial.print ((String) delta_micro);
-//      Serial.print (F("µs = "));
-//      Serial.print ((String) delta);
-//      Serial.print (F("ms / "));
-//      Serial.print ((String) deltaPress);
-//      Serial.print (F("ms / "));
-//      Serial.print ((String) deltaPress0);
-//      Serial.println (F("ms"));
-//      Serial.println ();
 
       Serial.print (F("ON" ));
       Serial.print (F(" ; "));
@@ -131,28 +103,6 @@ void loop() {
       Stop_Time  = RTC_Time;
       Stop_Milli = millis();
       Stop_Micro = lastOpto;
-//      Serial.print (F("Stop Time: "));
-//      Serial.println ((String) Stop_Time);
-//      Serial.print (F("Delta Time: "));
-//      Serial.println ((String) (Stop_Time-Start_Time));
-//      Serial.println ((String) (Stop_Milli-Start_Milli));
-//      Serial.println ((String) (Stop_Micro-Start_Micro));
-//      Serial.print (F("OFF: "));
-//      Serial.print ((String) toggleState);
-//      Serial.print (F(" @ "));
-//      Serial.print ((String) current_micro);
-//      Serial.print (F("µs > "));
-//      Serial.print ((String) lastOpto);
-//      Serial.print (F("µs ~ "));
-//      Serial.print ((String) delta_micro);
-//      Serial.print (F("µs = "));
-//      Serial.print ((String) delta);
-//      Serial.print (F("ms / "));
-//      Serial.print ((String) deltaPress);
-//      Serial.print (F("ms / "));
-//      Serial.print ((String) deltaPress0);
-//      Serial.println (F("ms ON"));
-//      Serial.println ();
 
       Serial.print (F("OFF"));
       Serial.print (F(" ; "));
