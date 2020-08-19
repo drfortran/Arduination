@@ -3,10 +3,6 @@
 
 const uint32_t SERIAL_SPEED        = 9600; ///< Set the baud rate for Serial I/O
 
-boolean reading;
-boolean lChambre; // État du relais
-boolean eBouton;  // État des interrupteurs
-
 // ---- ETHERNET
 
 // Enter a MAC address and IP address for your controller below.
@@ -18,6 +14,10 @@ IPAddress ip (192,168,9,179);
 // with the IP address and port you want to use
 // (port 80 is default for HTTP):
 EthernetServer server (80);
+
+boolean reading;
+boolean lChambre; // État du relais
+boolean eBouton;  // État des interrupteurs
 
 int in1 = 7;
 bool hasBeenDisplayed = false;
@@ -36,12 +36,12 @@ void setup () {
   reading = false;
   lChambre = false;
   eBouton = false;
-  Serial.println ("Initialize Ethernet without DHCP:");
+  Serial.println (F ("Initialize Ethernet without DHCP:"));
   Ethernet.begin (mac, ip);
   delay (1000);
   server.begin ();
-  Serial.print ("Arduino connecte: ");
-  Serial.print ("server is at ");
+  Serial.print (F ("Arduino connecte: "));
+  Serial.print (F ("server is at "));
   Serial.println (Ethernet.localIP ());
 }
 
@@ -62,9 +62,9 @@ void enAttente () {
     while (client.connected ()) {
       if (client.available ()) {
         if (!sentHeader) {
-          Serial.println ("HTTP/1.1 200 OK");
-          client.println ("HTTP/1.1 200 OK");
-          client.println ("Content-Type: text/html; charset=utf-8");
+          Serial.println (F ("HTTP/1.1 200 OK"));
+          client.println (F ("HTTP/1.1 200 OK"));
+          client.println (F ("Content-Type: text/html; charset=utf-8"));
           client.println ();
           sentHeader = true;
         }
@@ -75,12 +75,10 @@ void enAttente () {
           Serial.print (c);
           switch (c) {
           case '1':
-            // lChambre = !lChambre;
             lChambre = 0;
             digitalWrite (in1, lChambre);
             break;
           case '0':
-            // eBouton = !eBouton; // activer / désactiver les interrupteurs
             lChambre = 1;
             digitalWrite (in1, lChambre);
             break;
