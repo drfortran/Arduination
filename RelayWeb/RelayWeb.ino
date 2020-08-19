@@ -1,30 +1,43 @@
 #include <Ethernet.h>
 #include <SPI.h>
+
+const uint32_t SERIAL_SPEED        = 9600; ///< Set the baud rate for Serial I/O
+
 boolean reading;
-boolean lChambre; // Etat du relais
-boolean eBouton;  // Etat des interrupteurs
+boolean lChambre; // État du relais
+boolean eBouton;  // État des interrupteurs
+
+// ---- ETHERNET
+
+// Enter a MAC address and IP address for your controller below.
+// The IP address will be dependent on your local network:
 byte mac[] = { 0x90, 0xA2, 0xDA, 0x08, 0x00, 0x59 }; // L'adresse MAC de votre shield Ethernet (normalement il se trouve sous la carte
-// byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xCA, 0xFE };
 IPAddress ip (192,168,9,179);
-// EthernetServer server = EthernetServer (80);
+
+// Initialize the Ethernet server library
+// with the IP address and port you want to use
+// (port 80 is default for HTTP):
 EthernetServer server (80);
+
 int in1 = 7;
 bool hasBeenDisplayed = false;
 
 void setup () {
-  Serial.begin (9600);
+  // Open serial communications and wait for port to open:
+  Serial.begin (SERIAL_SPEED);
+#ifdef  __AVR_ATmega32U4__  // If this is a 32U4 processor, then wait for the serial interface to initialize
+  delay(3000);
+#endif
   while (!Serial) {
     ; // wait for serial port to connect. Needed for Leonardo only
   }
-  pinMode (6, INPUT); // Lire l'état du bouton poussoir
-  pinMode (in1, OUTPUT);// Controler le relais
+  pinMode (6, INPUT);    // Lire l'état du bouton poussoir
+  pinMode (in1, OUTPUT); // Contrôler le relais
   reading = false;
   lChambre = false;
   eBouton = false;
-  // Ethernet.begin (mac);
   Serial.println ("Initialize Ethernet without DHCP:");
   Ethernet.begin (mac, ip);
-  //    Ethernet.begin (mac);
   delay (1000);
   server.begin ();
   Serial.print ("Arduino connecte: ");
@@ -37,12 +50,11 @@ void loop () {
   if (digitalRead (6) == LOW && eBouton) {
     lChambre = !lChambre;
     digitalWrite (in1, lChambre);
-    delay (300); // Ce délai est nécessaire sinon chaque fois vous appuyez, Arduino en compte 2 appuis
+    delay (300); // Ce délai est nécessaire sinon chaque fois vous appuyez, Arduino compte 2 appuis
   }
 }
 
 void enAttente () {
-  // Serial.print ("Arduino loop... ");
   EthernetClient client = server.available ();
   if (client) {
     boolean currentLineIsBlank = true;
@@ -63,12 +75,12 @@ void enAttente () {
           Serial.print (c);
           switch (c) {
           case '1':
-            //                            lChambre = !lChambre;
+            // lChambre = !lChambre;
             lChambre = 0;
             digitalWrite (in1, lChambre);
             break;
           case '0':
-            //                            eBouton = !eBouton; // activer / désactiver les interrupteurs
+            // eBouton = !eBouton; // activer / désactiver les interrupteurs
             lChambre = 1;
             digitalWrite (in1, lChambre);
             break;
@@ -112,7 +124,7 @@ void enAttente () {
         if (c == '\n' && currentLineIsBlank) {break;}
         if (c == '\n') {
           currentLineIsBlank = true;
-        }else if (c != '\r') {
+        } else if (c != '\r') {
           currentLineIsBlank = false;
         }
       }
@@ -121,5 +133,5 @@ void enAttente () {
     client.stop ();
     hasBeenDisplayed = false;
   }
-  delay (30); //Permettre au navigateur de tout recevoir
+  delay (30); // Permettre au navigateur de tout recevoir
 }
