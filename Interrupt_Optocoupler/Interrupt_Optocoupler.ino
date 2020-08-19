@@ -36,7 +36,7 @@ void setup() {
     ; // wait for serial port to connect. Needed for Leonardo only
   }
   Serial.println ("Gestion des Interruptions: @ " + (String) micros () + " µs");
-                 
+
   // setup pin mode
   // pinMode (optoPin, INPUT_PULLUP);
   pinMode (optoPin, INPUT);
@@ -71,7 +71,7 @@ void loop() {
     optoFlag = 0;
     long unsigned int deltaPress0= lastPress - nextToLastPress;
     nextToLastPress = lastPress;
-    lastPress = millis();   //update lastPress                                                     
+    lastPress = millis();   //update lastPress
     long unsigned int deltaPress= lastPress - nextToLastPress;
     if(digitalRead (optoPin) == 0 && lastOptoState == 1)    //if button is pressed and was released last change
     {
@@ -122,7 +122,7 @@ void loop() {
 
       lastOptoState = 0;    //record the lastButtonState
     }
-    
+
     else if(digitalRead(optoPin) == 1 && lastOptoState == 0)    //if button is not pressed, and was pressed last change
     {
       current_micro = micros ();
