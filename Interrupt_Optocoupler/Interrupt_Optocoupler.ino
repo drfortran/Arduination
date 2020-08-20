@@ -68,7 +68,6 @@ void loop () {
   char          outputBuffer[SPRINTF_BUFFER_SIZE]; ///< Buffer for snprintf ()
   unsigned long Ard_Milli = millis ();
   long unsigned int delta = Ard_Milli - lastPress;
-  long unsigned int current_micro, delta_micro;
   if (delta > debounceTime && optoFlag) {
 #ifndef NO_RTC
     DateTime RTC_now = DS3231M.now (); // get the current time
@@ -82,9 +81,6 @@ void loop () {
     long unsigned int deltaPress= lastPress - nextToLastPress;
     if (digitalRead (optoPin) == 0 && lastOptoState == 1) {  // if button is pressed and was released last change
       toggleState =! toggleState;                 //toggle the LED state
-      current_micro = micros ();
-      delta_micro = (current_micro - lastOpto);
-      delta_micro = (lastOpto - nextToLastOpto);
       Start_Time  = RTC_Time;
       Start_Milli = Ard_Milli;
       Start_Micro = lastOpto;
@@ -98,9 +94,6 @@ void loop () {
       lastOptoState = 0;    //record the lastButtonState
     }
     else if (digitalRead (optoPin) == 1 && lastOptoState == 0) {  // if button is not pressed, and was pressed last change
-      current_micro = micros ();
-      delta_micro = (current_micro - lastOpto);
-      delta_micro = (lastOpto - nextToLastOpto);
       Stop_Time   = RTC_Time;
       Stop_Milli  = Ard_Milli;
       Stop_Micro  = lastOpto;
