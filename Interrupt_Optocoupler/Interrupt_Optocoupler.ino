@@ -42,6 +42,7 @@ void setup () {
   Serial.println (F ("Starting program"));
   Serial.println (F ("- Built with C++ version " __VERSION__));
   Serial.println (F ("- On " __DATE__ " at " __TIME__));
+  Serial.println (F ("- On " __TIMESTAMP__));
 
   // setup pin mode
   pinMode (optoPin, INPUT);
