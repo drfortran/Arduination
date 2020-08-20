@@ -53,15 +53,10 @@ void setup () {
       delay (3000);
     } // of loop until device is located
   Serial.println (F ("DS3231M initialized."));
-  DateTime RTC_now = DS3231M.now (); // get the current time
-  unsigned long RTC_Time = RTC_now.unixtime ();
-  Start_Time  = RTC_Time;
-  Stop_Time   = RTC_Time;
-  Start_Micro = micros ();
-  Stop_Micro  = micros ();
-  Start_Milli = millis ();
-  Stop_Milli  = millis ();
+  Stop_Time   = Start_Time  = DS3231M.now ().unixtime ();
 #endif
+  Stop_Micro  = Start_Micro = micros ();
+  Stop_Milli  = Start_Milli = millis ();
 }
 
 void loop () {
