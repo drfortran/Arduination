@@ -66,7 +66,8 @@ void setup () {
 
 void loop () {
   char          outputBuffer[SPRINTF_BUFFER_SIZE]; ///< Buffer for snprintf ()
-  long unsigned int delta = millis () - lastPress;
+  unsigned long Ard_Milli = millis ();
+  long unsigned int delta = Ard_Milli - lastPress;
   long unsigned int current_micro, delta_micro;
   if (delta > debounceTime && optoFlag) {
 #ifndef NO_RTC
@@ -84,8 +85,8 @@ void loop () {
       current_micro = micros ();
       delta_micro = (current_micro - lastOpto);
       delta_micro = (lastOpto - nextToLastOpto);
-      Start_Time = RTC_Time;
-      Start_Milli = millis ();
+      Start_Time  = RTC_Time;
+      Start_Milli = Ard_Milli;
       Start_Micro = lastOpto;
 
       // Transition to ON state
@@ -100,9 +101,9 @@ void loop () {
       current_micro = micros ();
       delta_micro = (current_micro - lastOpto);
       delta_micro = (lastOpto - nextToLastOpto);
-      Stop_Time  = RTC_Time;
-      Stop_Milli = millis ();
-      Stop_Micro = lastOpto;
+      Stop_Time   = RTC_Time;
+      Stop_Milli  = Ard_Milli;
+      Stop_Micro  = lastOpto;
 
       // Transition to OFF state
       snprintf_P (outputBuffer, SPRINTF_BUFFER_SIZE, format,
