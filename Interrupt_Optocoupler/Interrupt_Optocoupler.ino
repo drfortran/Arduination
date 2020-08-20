@@ -14,7 +14,6 @@ const char     format[] PROGMEM    = { "%1d ; %10lu ; %10lu ; %10lu ; %10ld ; %1
 int optoPin = 2;
 
 // global variables
-int toggleState;
 int lastOptoState = 1;
 long unsigned int lastPress, nextToLastPress;
 volatile long unsigned int lastOpto;
@@ -75,7 +74,6 @@ void loop () {
     lastPress = millis ();   //update lastPress
     long unsigned int deltaPress= lastPress - nextToLastPress;
     if (digitalRead (optoPin) == 0 && lastOptoState == 1) {  // if button is pressed and was released last change
-      toggleState =! toggleState;                 //toggle the LED state
       Start_Time  = RTC_Time;
       Start_Milli = Ard_Milli;
       Start_Micro = lastOpto;
