@@ -39,6 +39,9 @@ void setup () {
   Serial.print (F ("Gestion des Interruptions: @ "));
   Serial.print (micros ());
   Serial.println (F (" µs"));
+  Serial.println (F ("Starting program"));
+  Serial.println (F ("- Built with C++ version " __VERSION__));
+  Serial.println (F ("- On " __DATE__ " at " __TIME__));
 
   // setup pin mode
   pinMode (optoPin, INPUT);
