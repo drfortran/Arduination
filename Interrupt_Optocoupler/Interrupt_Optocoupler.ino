@@ -53,6 +53,14 @@ void setup () {
       delay (3000);
     } // of loop until device is located
   Serial.println (F ("DS3231M initialized."));
+  DateTime RTC_now = DS3231M.now (); // get the current time
+  unsigned long RTC_Time = RTC_now.unixtime ();
+  Start_Time  = RTC_Time;
+  Stop_Time   = RTC_Time;
+  Start_Micro = micros ();
+  Stop_Micro  = micros ();
+  Start_Milli = millis ();
+  Stop_Milli  = millis ();
 #endif
 }
 
@@ -80,20 +88,7 @@ void loop () {
       Start_Milli = millis ();
       Start_Micro = lastOpto;
 
-      Serial.print (F ("ON" ));
-      Serial.print (F (" ; "));
-      Serial.print (Start_Time);
-      Serial.print (F (" ; "));
-      Serial.print (Start_Milli);
-      Serial.print (F (" ; "));
-      Serial.print (Start_Micro);
-      Serial.print (F (" ; "));
-      Serial.print ((String) (Start_Time-Stop_Time));
-      Serial.print (F (" ; "));
-      Serial.print ((String) (Start_Milli-Stop_Milli));
-      Serial.print (F (" ; "));
-      Serial.print ((String) (Start_Micro-Stop_Micro));
-      Serial.println ();
+      // Transition to ON state
       snprintf_P (outputBuffer, SPRINTF_BUFFER_SIZE, format,
                 1, Start_Time, Start_Milli, Start_Micro,
                 (Start_Time-Stop_Time), (Start_Milli-Stop_Milli), (Start_Micro-Stop_Micro));
@@ -109,20 +104,7 @@ void loop () {
       Stop_Milli = millis ();
       Stop_Micro = lastOpto;
 
-      Serial.print (F ("OFF"));
-      Serial.print (F (" ; "));
-      Serial.print (Stop_Time);
-      Serial.print (F (" ; "));
-      Serial.print (Stop_Milli);
-      Serial.print (F (" ; "));
-      Serial.print (Stop_Micro);
-      Serial.print (F (" ; "));
-      Serial.print ((String) (Stop_Time-Start_Time));
-      Serial.print (F (" ; "));
-      Serial.print ((String) (Stop_Milli-Start_Milli));
-      Serial.print (F (" ; "));
-      Serial.print ((String) (Stop_Micro-Start_Micro));
-      Serial.println ();
+      // Transition to OFF state
       snprintf_P (outputBuffer, SPRINTF_BUFFER_SIZE, format,
                 0, Stop_Time, Stop_Milli, Stop_Micro,
                 (Stop_Time-Start_Time), (Stop_Milli-Start_Milli), (Stop_Micro-Start_Micro));
