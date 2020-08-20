@@ -7,6 +7,8 @@ DS3231M_Class DS3231M;                          ///< Create an instance of the D
 #endif
 
 const uint32_t SERIAL_SPEED        = 9600; ///< Set the baud rate for Serial I/O
+const uint8_t  SPRINTF_BUFFER_SIZE =   85; ///< Buffer size for snprintf ()
+const char     format[] PROGMEM    = { "%1d ; %10lu ; %10lu ; %10lu ; %10ld ; %10ld ; %10ld" };
 
 // pin definitions
 int optoPin = 2;
@@ -35,7 +37,9 @@ void setup () {
   while (!Serial) {
     ; // wait for serial port to connect. Needed for Leonardo only
   }
-  Serial.println ("Gestion des Interruptions: @ " + (String) micros () + " µs");
+  Serial.print (F ("Gestion des Interruptions: @ "));
+  Serial.print (micros ());
+  Serial.println (F (" µs"));
 
   // setup pin mode
   pinMode (optoPin, INPUT);
@@ -53,6 +57,7 @@ void setup () {
 }
 
 void loop () {
+  char          outputBuffer[SPRINTF_BUFFER_SIZE]; ///< Buffer for snprintf ()
   long unsigned int delta = millis () - lastPress;
   long unsigned int current_micro, delta_micro;
   if (delta > debounceTime && optoFlag) {
@@ -89,6 +94,10 @@ void loop () {
       Serial.print (F (" ; "));
       Serial.print ((String) (Start_Micro-Stop_Micro));
       Serial.println ();
+      snprintf_P (outputBuffer, SPRINTF_BUFFER_SIZE, format,
+                1, Start_Time, Start_Milli, Start_Micro,
+                (Start_Time-Stop_Time), (Start_Milli-Stop_Milli), (Start_Micro-Stop_Micro));
+      Serial.println (outputBuffer);
 
       lastOptoState = 0;    //record the lastButtonState
     }
@@ -114,6 +123,10 @@ void loop () {
       Serial.print (F (" ; "));
       Serial.print ((String) (Stop_Micro-Start_Micro));
       Serial.println ();
+      snprintf_P (outputBuffer, SPRINTF_BUFFER_SIZE, format,
+                0, Stop_Time, Stop_Milli, Stop_Micro,
+                (Stop_Time-Start_Time), (Stop_Milli-Start_Milli), (Stop_Micro-Start_Micro));
+      Serial.println (outputBuffer);
 
       lastOptoState = 1;    //record the lastButtonState
     }
