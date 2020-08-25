@@ -73,11 +73,6 @@ void setup () {
 
 void loop () {
   enAttente ();
-  if (digitalRead (6) == LOW && false) {
-    lChambre = !lChambre;
-    digitalWrite (in1, lChambre);
-    delay (300); // Ce délai est nécessaire sinon chaque fois vous appuyez, Arduino compte 2 appuis
-  }
 }
 
 void enAttente () {
