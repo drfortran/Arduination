@@ -37,12 +37,12 @@ const uint32_t SERIAL_SPEED        = 9600; ///< Set the baud rate for Serial I/O
 // The IP address will be dependent on your local network:
 byte mac[] = {
   0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
-IPAddress ip(192,168,9,182);
+IPAddress ip (192,168,9,182);
 
 // Initialize the Ethernet server library
 // with the IP address and port you want to use
 // (port 80 is default for HTTP):
-EthernetServer server(80);
+EthernetServer server (80);
 
 #ifndef NO_RTC
 DS3231M_Class DS3231M;                          ///< Create an instance of the DS3231M Class
@@ -50,7 +50,7 @@ DS3231M_Class DS3231M;                          ///< Create an instance of the D
 
 // ---- NTP
 EthernetUDP ntpUDP;
-NTPClient timeClient(ntpUDP);
+NTPClient timeClient (ntpUDP);
 
 // ---- ONE WIRE
 
@@ -60,262 +60,261 @@ NTPClient timeClient(ntpUDP);
 #define TEMPERATURE_PRECISION 12
 
 // Setup a oneWire instance to communicate with any OneWire devices (not just Maxim/Dallas temperature ICs)
-OneWire oneWire(ONE_WIRE_BUS);
+OneWire oneWire (ONE_WIRE_BUS);
 
 // Pass our oneWire reference to Dallas Temperature.
-DallasTemperature sensors(&oneWire);
+DallasTemperature sensors (&oneWire);
 
 // arrays to hold device addresses
 DeviceAddress devices[10];
 int devicesFound = 0;
 
-void setup() {
+void setup () {
   // disable SD SPI
-  pinMode(4,OUTPUT);
-  digitalWrite(4,HIGH);
+  pinMode (4,OUTPUT);
+  digitalWrite (4,HIGH);
   // Open serial communications and wait for port to open:
-  Serial.begin(SERIAL_SPEED);
+  Serial.begin (SERIAL_SPEED);
 #ifdef  __AVR_ATmega32U4__  // If this is a 32U4 processor, then wait for the serial interface to initialize
-  delay(3000);
+  delay (3000);
 #endif
   while (!Serial) {
     ; // wait for serial port to connect. Needed for Leonardo only
   }
-  //Serial.print("Startup reason:");Serial.println(ESP.getResetReason());
+  //Serial.print ("Startup reason:");Serial.println (ESP.getResetReason ());
 
   // start the Ethernet connection and the server:
-  // Ethernet.begin(mac, ip);
+  // Ethernet.begin (mac, ip);
   // start the Ethernet connection:
   // DHCP version
-  Serial.println(F("Initialize Ethernet with DHCP:"));
+  Serial.println (F ("Initialize Ethernet with DHCP:"));
   if (1 == 1)
-      Ethernet.begin(mac, ip);
+      Ethernet.begin  (mac, ip);
   else
-    if (Ethernet.begin(mac) == 0) {
-      Serial.println(F("Failed to configure Ethernet using DHCP"));
-      Ethernet.begin(mac, ip);
-      //if (Ethernet.hardwareStatus() == EthernetNoHardware) {
-      //  Serial.println(F("Ethernet shield was not found.  Sorry, can't run without hardware. :("));
-      //}// else if (Ethernet.linkStatus() == LinkOFF) {
-      //  Serial.println(F("Ethernet cable is not connected."));
+    if (Ethernet.begin (mac) == 0) {
+      Serial.println (F ("Failed to configure Ethernet using DHCP"));
+      Ethernet.begin (mac, ip);
+      //if (Ethernet.hardwareStatus () == EthernetNoHardware) {
+      //  Serial.println (F ("Ethernet shield was not found. Sorry, can't run without hardware. :("));
+      //}// else if (Ethernet.linkStatus () == LinkOFF) {
+      //  Serial.println (F ("Ethernet cable is not connected."));
       //}
       // no point in carrying on, so do nothing forevermore:
       //while (true) {
-      //  delay(1);
+      //  delay (1);
       //}
     //}
     };
-  delay(1000);
+  delay (1000);
   // print your local IP address:
-  server.begin();
-  Serial.print(F("server is at "));
-  Serial.println(Ethernet.localIP());
+  server.begin ();
+  Serial.print (F ("server is at "));
+  Serial.println (Ethernet.localIP ());
 
 #ifndef NO_RTC
   // Initialize communications with the RTC
-  while (!DS3231M.begin())
+  while (!DS3231M.begin ())
   {
-    Serial.println(F("Unable to find DS3231MM. Checking again in 3s."));
-    delay(3000);
+    Serial.println (F ("Unable to find DS3231MM. Checking again in 3s."));
+    delay (3000);
   } // of loop until device is located
-  Serial.println(F("DS3231M initialized."));
+  Serial.println (F ("DS3231M initialized."));
 #endif
 
   // --- NTP
-  timeClient.begin();
+  timeClient.begin ();
 
   // --- THERMO ---
   // Start up the library
-  sensors.begin();
+  sensors.begin ();
 
   // locate devices on the bus
-  Serial.print(F("Locating devices..."));
-  Serial.print(F("Found "));
-  Serial.print(sensors.getDeviceCount(), DEC);
-  Serial.println(F(" devices."));
+  Serial.print (F ("Locating devices..."));
+  Serial.print (F ("Found "));
+  Serial.print (sensors.getDeviceCount (), DEC);
+  Serial.println (F (" devices."));
 
-  devicesFound = sensors.getDeviceCount();
+  devicesFound = sensors.getDeviceCount ();
 
   // report parasite power requirements
-  Serial.print(F("Parasite power is: "));
-  if (sensors.isParasitePowerMode()) Serial.println("ON");
-  else Serial.println(F("OFF"));
+  Serial.print (F ("Parasite power is: "));
+  if (sensors.isParasitePowerMode ()) Serial.println ("ON");
+  else Serial.println (F ("OFF"));
 
   for (int i = 0; i < devicesFound; i++)
-    if (!sensors.getAddress(devices[i], i)) {
-      Serial.print(F("Unable to find address for Device"));
-      Serial.println((String) i);
+    if (!sensors.getAddress (devices[i], i)) {
+      Serial.print (F ("Unable to find address for Device"));
+      Serial.println ((String) i);
     }
 
   // show the addresses we found on the bus
   for (int i = 0; i < devicesFound; i++)
   {
-    Serial.print(F("Device "));
-    Serial.print((String)i);
-    Serial.print(F(" Address: "));
-    printAddress(devices[i]);
-    Serial.println();
-    Serial.println(stringPrintAddress(devices[i]));
-    Serial.println();
+    Serial.print (F ("Device "));
+    Serial.print ((String) i);
+    Serial.print (F (" Address: "));
+    printAddress (devices[i]);
+    Serial.println ();
+    Serial.println (stringPrintAddress (devices[i]));
+    Serial.println ();
   }
 
   for (int i = 0; i < devicesFound; i++)
-    sensors.setResolution(devices[i], TEMPERATURE_PRECISION);
+    sensors.setResolution (devices[i], TEMPERATURE_PRECISION);
 
-  delay(1000);
-  timeClient.update();
-  timeClient.setUpdateInterval(3600);
-  delay(100);
+  delay (1000);
+  timeClient.update ();
+  timeClient.setUpdateInterval (3600);
+  delay (100);
 #ifndef NO_RTC
-    DS3231M.adjust(DateTime((uint32_t) timeClient.getEpochTime())); // Set to library compile Date/Time
-    Serial.print(F("Date/Time set to NTP time: "));
+    DS3231M.adjust (DateTime ((uint32_t) timeClient.getEpochTime ())); // Set to library compile Date/Time
+    Serial.print (F ("Date/Time set to NTP time: "));
 #endif
-  wdt_enable(WDTO_8S);
-  Serial.println(F("Setup ended"));
+  wdt_enable (WDTO_8S);
+  Serial.println (F ("Setup ended"));
 }
 
 // function to print a device address
-void printAddress(DeviceAddress deviceAddress)
+void printAddress (DeviceAddress deviceAddress)
 {
   for (uint8_t i = 0; i < 8; i++)
   {
     // zero pad the address if necessary
-    if (deviceAddress[i] < 16) Serial.print("0");
-    Serial.print(deviceAddress[i], HEX);
+    if (deviceAddress[i] < 16) Serial.print ("0");
+    Serial.print (deviceAddress[i], HEX);
   }
 }
 
 // function to print a device address
-String stringPrintAddress(DeviceAddress deviceAddress)
+String stringPrintAddress (DeviceAddress deviceAddress)
 {
-  String s("");
+  String s ("");
   for (uint8_t i = 0; i < 8; i++)
   {
     // zero pad the address if necessary
     if (deviceAddress[i] < 16)
       s += "0";
-      s += String(deviceAddress[i], HEX);
+      s += String (deviceAddress[i], HEX);
   }
   return s;
 }
 
 // function to print the temperature for a device
-String printTemperature(DeviceAddress deviceAddress)
+String printTemperature (DeviceAddress deviceAddress)
 {
-  float tempC = sensors.getTempC(deviceAddress);
+  float tempC = sensors.getTempC (deviceAddress);
   if (tempC < 10)
-    return "0" + (String)tempC;
+    return "0" + (String) tempC;
   else
-    return (String)tempC;
+    return (String) tempC;
 }
 
 // function to print a device's resolution
-void printResolution(DeviceAddress deviceAddress)
+void printResolution (DeviceAddress deviceAddress)
 {
-  Serial.print(F("Resolution: "));
-  Serial.print(sensors.getResolution(deviceAddress));
-  Serial.println();
+  Serial.print (F ("Resolution: "));
+  Serial.print (sensors.getResolution (deviceAddress));
+  Serial.println ();
 }
-
 
 // main function to print information about a device
-void printData(DeviceAddress deviceAddress)
+void printData (DeviceAddress deviceAddress)
 {
-  server.print(stringPrintAddress(deviceAddress));
-  server.print(",");
-  server.print(printTemperature(deviceAddress));
-  server.print(",");
+  server.print (stringPrintAddress (deviceAddress));
+  server.print (",");
+  server.print (printTemperature (deviceAddress));
+  server.print (",");
 }
 
 
-void loop() {
-  wdt_reset();
+void loop () {
+  wdt_reset ();
 
   // listen for incoming clients
-  EthernetClient client = server.available();
+  EthernetClient client = server.available ();
 
 
   if (client) {
-    Serial.println("new client");
+    Serial.println ("new client");
     // an http request ends with a blank line
     boolean currentLineIsBlank = true;
-    while (client.connected()) {
-      if (client.available()) {
-        char c = client.read();
-        Serial.write(c);
+    while (client.connected ()) {
+      if (client.available ()) {
+        char c = client.read ();
+        Serial.write (c);
         // if you've gotten to the end of the line (received a newline
         // character) and the line is blank, the http request has ended,
         // so you can send a reply
         if (c == '\n' && currentLineIsBlank) {
           // send a standard http response header
-          client.println(F("HTTP/1.1 200 OK"));
-          client.println(F("Content-Type: text/html"));
-          client.println(F("Connection: close"));  // the connection will be closed after completion of the response
-          client.println();
-          client.println(F("<!DOCTYPE HTML>"));
-          client.println(F("<html>"));
+          client.println (F ("HTTP/1.1 200 OK"));
+          client.println (F ("Content-Type: text/html"));
+          client.println (F ("Connection: close"));  // the connection will be closed after completion of the response
+          client.println ();
+          client.println (F ("<!DOCTYPE HTML>"));
+          client.println (F ("<html>"));
           // output the value of each analog input pin
           /*
           for (int analogChannel = 0; analogChannel < 6; analogChannel++) {
-            int sensorReading = analogRead(analogChannel);
-            client.print("analog input ");
-            client.print(analogChannel);
-            client.print(" is ");
-            client.print(sensorReading);
-            client.println("<br />");
+            int sensorReading = analogRead (analogChannel);
+            client.print ("analog input ");
+            client.print (analogChannel);
+            client.print (" is ");
+            client.print (sensorReading);
+            client.println ("<br />");
           }
           */
           // ---- BEGIN Handle Thermo  -----------------------------------
           if (devicesFound == 0)
           {
-             client.println(F("No devices found."));
+             client.println (F ("No devices found."));
              //return;
           }
-          sensors.requestTemperatures();
+          sensors.requestTemperatures ();
 
           String sent = "";
 
-          unsigned long NTP_Time = timeClient.getEpochTime();
+          unsigned long NTP_Time = timeClient.getEpochTime ();
 #ifndef NO_RTC
-          DateTime RTC_now = DS3231M.now(); // get the current time
-          unsigned long RTC_Time = RTC_now.unixtime();
-          Serial.print((String)RTC_Time);
-          Serial.print(F(" ~ "));
-          Serial.print((String)NTP_Time);
-          Serial.println(F(" ; "));
+          DateTime RTC_now = DS3231M.now (); // get the current time
+          unsigned long RTC_Time = RTC_now.unixtime ();
+          Serial.print ((String) RTC_Time);
+          Serial.print (F (" ~ "));
+          Serial.print ((String) NTP_Time);
+          Serial.println (F (" ; "));
 
-          sent += (String)RTC_Time;
+          sent += (String) RTC_Time;
           sent += " ; ";
 #endif
 
           // print the device information
-          sent += (String)NTP_Time;
+          sent += (String) NTP_Time;
           sent += " ; ";
-          sent += (String)millis();
+          sent += (String) millis ();
           sent += " ; ";
-          sent += timeClient.getFormattedTime();
+          sent += timeClient.getFormattedTime ();
           sent += " ; ";
           for (int i = 0; i < devicesFound; i++)
           {
-            sent += stringPrintAddress(devices[i]);
+            sent += stringPrintAddress (devices[i]);
             sent += " ; ";
-            sent += printTemperature(devices[i]);
+            sent += printTemperature (devices[i]);
             if (i != devicesFound - 1)
               sent += " ; ";
           }
 
-          client.println(sent);
+          client.println (sent);
           if (devicesFound == 0)
           {
-             delay(1);
+             delay (1);
              // close the connection:
-             client.stop();
+             client.stop ();
              return;
           }
 
           // ---- END Handle Thermo -----------------------------------
 
-          client.println(F("</html>"));
+          client.println (F("</html>"));
           break;
         }
         if (c == '\n') {
@@ -329,9 +328,9 @@ void loop() {
       }
     }
     // give the web browser time to receive the data
-    delay(1);
+    delay (1);
     // close the connection:
-    client.stop();
-    Serial.println(F("client disconnected"));
+    client.stop ();
+    Serial.println (F ("client disconnected"));
   }
 }
