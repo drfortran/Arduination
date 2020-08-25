@@ -102,8 +102,20 @@ void enAttente () {
             lChambre = 1;
             digitalWrite (in1, lChambre);
             break;
+          case '2':
+            Serial.print (F ("Variable lChambre"));
+            Serial.println (lChambre);
+            Serial.print (F ("État : "));
+            if (lChambre == 0) {
+              Serial.println (F ("Allumé"));
+            }
+            else {
+              Serial.println (F ("Éteint"));
+            };
+
+            break;
           }
-          if (((c == '0') || (c == '1')) && !hasBeenDisplayed) {
+          if (((c == '0') || (c == '1') || (c == '2')) && !hasBeenDisplayed) {
             client.println (F ("<!DOCTYPE html>"));
             client.println (F ("<html>"));
             client.println (F ("  <head>"));
@@ -126,7 +138,8 @@ void enAttente () {
             client.println (F (" <body>"));
             client.println (F ("    <button class=\"button\" onclick=\"window.location.href = 'http://192.168.9.179/?0';\">ETEINDRE</button>"));
             client.println (F ("    <button class=\"button\" onclick=\"window.location.href = 'http://192.168.9.179/?1';\">ALLUMER</button>"));
-            client.println (F ("<div>   Etat</div>"));
+            client.println (F ("    <button class=\"button\" onclick=\"window.location.href = 'http://192.168.9.179/?2';\">AFFICHER</button>"));
+            client.println (F ("<div>   État</div>"));
 
             if (lChambre == 0) {
               client.println (F ("<div> Allumé</div>"));
