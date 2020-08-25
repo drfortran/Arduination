@@ -17,7 +17,6 @@ EthernetServer server (80);
 
 boolean reading;
 boolean lChambre; // État du relais
-boolean eBouton;  // État des interrupteurs
 
 int in1 = 7;
 bool hasBeenDisplayed = false;
@@ -63,7 +62,6 @@ void setup () {
   pinMode (in1, OUTPUT); // Contrôler le relais
   reading = false;
   lChambre = false;
-  eBouton = false;
   Serial.println (F ("Initialize Ethernet without DHCP:"));
   Ethernet.begin (mac, ip);
   delay (1000);
@@ -75,7 +73,7 @@ void setup () {
 
 void loop () {
   enAttente ();
-  if (digitalRead (6) == LOW && eBouton) {
+  if (digitalRead (6) == LOW && false) {
     lChambre = !lChambre;
     digitalWrite (in1, lChambre);
     delay (300); // Ce délai est nécessaire sinon chaque fois vous appuyez, Arduino compte 2 appuis
