@@ -54,7 +54,11 @@ EthernetServer server(80);
 DS3231M_Class DS3231M;                          ///< Create an instance of the DS3231M Class
 #endif
 
-void setup() {
+void LogData ();
+bool ServiceClient (EthernetClient *client);
+char GetRequestedHttpResource (char *req_line, char *file_name, char *file_type);
+
+void setup () {
   // deselect Ethernet chip on SPI bus
   pinMode(PIN_ETH_SPI, OUTPUT);
   digitalWrite(PIN_ETH_SPI, HIGH);
@@ -68,89 +72,97 @@ void setup() {
     ; // wait for serial port to connect. Needed for Leonardo only
   }
 
+  Serial.print (F ("Logger + Server: @ "));
+  Serial.print (micros ());
+  Serial.println (F (" µs"));
+  Serial.println (F ("Starting program"));
+  Serial.println (F ("- Built with C++ version " __VERSION__));
+  Serial.println (F ("- On " __DATE__ " at " __TIME__));
+  Serial.println (F ("- On " __TIMESTAMP__));
+
   if (!SD.begin(4)) {
-    Serial.println(F("SD card initialization failed! Things to check:"));
-    Serial.println(F("1. is a card inserted?"));
-    Serial.println(F("2. is your wiring correct?"));
-    Serial.println(F("3. did you change the chipSelect pin to match your shield or module?"));
-    Serial.println(F("Note: press reset or reopen this serial monitor after fixing your issue!"));
+    Serial.println (F ("SD card initialization failed! Things to check:"));
+    Serial.println (F ("1. is a card inserted?"));
+    Serial.println (F ("2. is your wiring correct?"));
+    Serial.println (F ("3. did you change the chipSelect pin to match your shield or module?"));
+    Serial.println (F ("Note: press reset or reopen this serial monitor after fixing your issue!"));
     return;  // SD card initialization failed
   }
 
-  Serial.println(F("Initialize Ethernet without DHCP:"));
-  Ethernet.begin((uint8_t*)mac, ip, gateway, subnet);
-  delay(1000);
-  server.begin();  // start listening for clients
-  Serial.print(F("server is at "));
-  Serial.println(Ethernet.localIP());
+  Serial.println (F ("Initialize Ethernet without DHCP:"));
+  Ethernet.begin ((uint8_t*) mac, ip, gateway, subnet);
+  delay (1000);
+  server.begin ();  // start listening for clients
+  Serial.print (F ("server is at "));
+  Serial.println (Ethernet.localIP ());
   for (byte thisByte = 0; thisByte < 4; thisByte++) {
     // print the value of each byte of the IP address:
-    Serial.print(Ethernet.localIP()[thisByte], DEC);
-    Serial.print(F("."));
+    Serial.print (Ethernet.localIP ()[thisByte], DEC);
+    Serial.print (F ("."));
   }
-  Serial.println();
+  Serial.println ();
 
 #ifndef NO_RTC
   // Initialize communications with the RTC
-  while (!DS3231M.begin())
+  while (!DS3231M.begin ())
   {
-    Serial.println(F("Unable to find DS3231MM. Checking again in 3s."));
-    delay(3000);
+    Serial.println (F ("Unable to find DS3231MM. Checking again in 3s."));
+    delay (3000);
   } // of loop until device is located
-  Serial.println(F("DS3231M initialized."));
+  Serial.println (F ("DS3231M initialized."));
 #endif
 }
 
-void loop() {
+void loop () {
   // if an incoming client connects, there will be bytes available to read:
-  EthernetClient client = server.available();
+  EthernetClient client = server.available ();
   if (client) {
-    Serial.println(F("new client"));
-    while (client.connected()) {
-      if (ServiceClient(&client)) {
+    Serial.println (F ("new client"));
+    while (client.connected ()) {
+      if (ServiceClient (&client)) {
         // received request from client and finished responding
         break;
       }
-    }  // while (client.connected())
-    delay(1);
-    client.stop();
+    }  // while (client.connected ())
+    delay (1);
+    client.stop ();
   }  // if (client)
   // log the data
-  LogData();
-}// void loop()
+  LogData ();
+}// void loop ()
 
-void LogData(void)
+void LogData (void)
 {
   unsigned long current_time;   // current millisecond time
   File logFile;                 // file to log data to
 
-  current_time = millis();  // get the current time in milliseconds
+  current_time = millis ();  // get the current time in milliseconds
   if ((current_time - prev_log_time) > log_time_ms) {
     prev_log_time = current_time;
 #ifndef NO_RTC
-    DateTime RTC_now = DS3231M.now(); // get the current time
-    unsigned long RTC_Time = RTC_now.unixtime();
-//    Serial.print((String)RTC_Time);
-//    Serial.print(F(" ~ "));
-//    Serial.print((String)NTP_Time);
-//    Serial.println(F(" ; "));
+    DateTime RTC_now = DS3231M.now (); // get the current time
+    unsigned long RTC_Time = RTC_now.unixtime ();
+//    Serial.print ((String) RTC_Time);
+//    Serial.print (F (" ~ "));
+//    Serial.print ((String) NTP_Time);
+//    Serial.println (F (" ; "));
 #endif
     // the log time has elapsed, so log another set of data
-    logFile = SD.open("log.txt", FILE_WRITE);
+    logFile = SD.open ("log.txt", FILE_WRITE);
     if (logFile) {
-      logFile.print(current_time);
-      logFile.print(" ; ");
+      logFile.print (current_time);
+      logFile.print (" ; ");
 #ifndef NO_RTC
-      logFile.print(RTC_Time);
-      logFile.print(" ; ");
+      logFile.print (RTC_Time);
+      logFile.print (" ; ");
 #endif
-      logFile.println(analogRead(5)); // log the analog pin value
-      logFile.close();
+      logFile.println (analogRead (5)); // log the analog pin value
+      logFile.close ();
     }
   }
 }
 
-bool ServiceClient(EthernetClient *client)
+bool ServiceClient (EthernetClient *client)
 {
   static boolean currentLineIsBlank = true;
   char cl_char;
@@ -165,8 +177,8 @@ bool ServiceClient(EthernetClient *client)
   static unsigned char req_line_index = 0;
   static bool got_line_1 = false;
 
-  if (client->available()) {   // client data available to read
-    cl_char = client->read();
+  if (client->available ()) {   // client data available to read
+    cl_char = client->read ();
 
     if ((req_line_index < 39) && (got_line_1 == false)) {
       if ((cl_char != '\r') && (cl_char != '\n')) {
@@ -187,21 +199,21 @@ bool ServiceClient(EthernetClient *client)
           webFile = SD.open(file_name);        // open requested file
           if (webFile) {
             // send a standard http response header
-            client->println(F("HTTP/1.1 200 OK"));
-            client->print(F("Content-Type: "));
-            client->println(file_types[req_file_type]);
-            client->println(F("Connection: close"));
-            client->println();
+            client->println (F ("HTTP/1.1 200 OK"));
+            client->print (F ("Content-Type: "));
+            client->println (file_types[req_file_type]);
+            client->println (F ("Connection: close"));
+            client->println ();
             // send web page
-            while(webFile.available()) {
+            while (webFile.available ()) {
               int num_bytes_read;
               char byte_buffer[64];
               // get bytes from requested file
-              num_bytes_read = webFile.read(byte_buffer, 64);
+              num_bytes_read = webFile.read (byte_buffer, 64);
               // send the file bytes to the client
-              client->write(byte_buffer, num_bytes_read);
+              client->write (byte_buffer, num_bytes_read);
             }
-            webFile.close();
+            webFile.close ();
           }
           else {
             // failed to open file
@@ -229,48 +241,48 @@ bool ServiceClient(EthernetClient *client)
     else if (cl_char != '\r') {
       currentLineIsBlank = false;
     }
-  }  // if (client.available())
+  }  // if (client.available ())
   return 0;
 }
 
 // extract file name from first line of HTTP request
-char GetRequestedHttpResource(char *req_line, char *file_name, char *file_type)
+char GetRequestedHttpResource (char *req_line, char *file_name, char *file_type)
 {
   char request_type = HTTP_invalid;  // 1 = GET, 2 = POST. 0 = invalid
   char *str_token;
 
   *file_type = FT_INVALID;
 
-  str_token =  strtok(req_line, " ");    // get the request type
-  if (strcmp(str_token, "GET") == 0) {
+  str_token =  strtok (req_line, " ");    // get the request type
+  if (strcmp (str_token, "GET") == 0) {
     request_type = HTTP_GET;
-    str_token =  strtok(NULL, " ");      // get the file name
-    if (strcmp(str_token, "/") == 0) {
-      strcpy(file_name, "index.htm");
+    str_token =  strtok (NULL, " ");      // get the file name
+    if (strcmp (str_token, "/") == 0) {
+      strcpy (file_name, "index.htm");
       *file_type = FT_HTML;
     }
-    else if (strlen(str_token) <= FILE_NAME_LEN) {
+    else if (strlen (str_token) <= FILE_NAME_LEN) {
       // file name is within allowed length
-      strcpy(file_name, str_token);
+      strcpy (file_name, str_token);
       // get the file extension
-      str_token = strtok(str_token, ".");
-      str_token = strtok(NULL, ".");
+      str_token = strtok (str_token, ".");
+      str_token = strtok (NULL, ".");
 
-      if      (strcmp(str_token, "htm") == 0) {*file_type = 0;}
-      else if (strcmp(str_token, "ico") == 0) {*file_type = 1;}
-      else if (strcmp(str_token, "css") == 0) {*file_type = 2;}
-      else if (strcmp(str_token, "js")  == 0) {*file_type = 3;}
-      else if (strcmp(str_token, "jpg") == 0) {*file_type = 4;}
-      else if (strcmp(str_token, "png") == 0) {*file_type = 5;}
-      else if (strcmp(str_token, "gif") == 0) {*file_type = 6;}
-      else if (strcmp(str_token, "txt") == 0) {*file_type = 7;}
+      if      (strcmp (str_token, "htm") == 0) {*file_type = 0;}
+      else if (strcmp (str_token, "ico") == 0) {*file_type = 1;}
+      else if (strcmp (str_token, "css") == 0) {*file_type = 2;}
+      else if (strcmp (str_token, "js")  == 0) {*file_type = 3;}
+      else if (strcmp (str_token, "jpg") == 0) {*file_type = 4;}
+      else if (strcmp (str_token, "png") == 0) {*file_type = 5;}
+      else if (strcmp (str_token, "gif") == 0) {*file_type = 6;}
+      else if (strcmp (str_token, "txt") == 0) {*file_type = 7;}
       else {*file_type = 8;}
     }
     else {
       // file name too long
     }
   }
-  else if (strcmp(str_token, "POST") == 0) {
+  else if (strcmp (str_token, "POST") == 0) {
     request_type = HTTP_POST;
   }
 
