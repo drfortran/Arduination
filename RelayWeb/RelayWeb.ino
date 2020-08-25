@@ -22,6 +22,8 @@ boolean eBouton;  // État des interrupteurs
 int in1 = 7;
 bool hasBeenDisplayed = false;
 
+void enAttente ();
+
 void setup () {
   // Open serial communications and wait for port to open:
   Serial.begin (SERIAL_SPEED);
@@ -31,6 +33,32 @@ void setup () {
   while (!Serial) {
     ; // wait for serial port to connect. Needed for Leonardo only
   }
+  Serial.print (F ("Relay control over the Web:"));
+  Serial.println (F ("Starting program"));
+  Serial.println (F ("- Built on " __DATE__ " at " __TIME__ " with"));
+  const String str_compiler_version PROGMEM = F ("compiler_version:" __VERSION__);
+  Serial.print(str_compiler_version);
+
+#ifdef CPP_PATH
+  const String str_compiler_path PROGMEM = F ("compiler_path:" CPP_PATH);
+  Serial.print(str_compiler_path);
+#endif
+
+#ifdef VERSION
+  const String str_version PROGMEM = F ("source_version:" VERSION);
+  Serial.print(str_version);
+#endif
+
+#ifdef LASTDATE
+  const String str_lastdate PROGMEM = F ("source_lastdate:" LASTDATE);
+  Serial.print(str_lastdate);
+#endif
+
+#ifdef __TIMESTAMPISO__
+  const String str___timestampiso__ PROGMEM = F ("build_timestamp:" __TIMESTAMPISO__);
+  Serial.print(str___timestampiso__);
+#endif
+
   pinMode (6, INPUT);    // Lire l'état du bouton poussoir
   pinMode (in1, OUTPUT); // Contrôler le relais
   reading = false;
