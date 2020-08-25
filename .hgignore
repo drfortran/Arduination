@@ -5,6 +5,9 @@ syntax: glob
 *.mod
 *~
 *.o
+*.d
+*.eep
+*.a
 *.so
 *.dll
 *.exe
