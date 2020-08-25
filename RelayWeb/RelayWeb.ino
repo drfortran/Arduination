@@ -58,7 +58,6 @@ void setup () {
   Serial.print(str___timestampiso__);
 #endif
 
-  pinMode (6, INPUT);    // Lire l'état du bouton poussoir
   pinMode (in1, OUTPUT); // Contrôler le relais
   reading = false;
   lChambre = false;
