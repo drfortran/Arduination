@@ -151,6 +151,29 @@ void enAttente () {
               client.println (F ("<div> Éteint</div>"));
             };
 
+#ifdef CPP_PATH
+            const String str_compiler_path PROGMEM = F ("<!-- compiler_path:" CPP_PATH " -->");
+            client.println(str_compiler_path);
+#endif
+
+#ifdef VERSION
+            const String str_version PROGMEM = F ("<!-- source_version:" VERSION " -->");
+            client.println(str_version);
+#endif
+
+#ifdef LASTDATE
+            const String str_lastdate PROGMEM = F ("<!-- source_lastdate:" LASTDATE " -->");
+            client.println(str_lastdate);
+#endif
+
+#ifdef __TIMESTAMPISO__
+            const String str___timestampiso__ PROGMEM = F ("<!-- build_timestamp:" __TIMESTAMPISO__ " -->");
+            client.println(str___timestampiso__);
+#endif
+            client.print ("<!-- IP_address:");
+            client.print (Ethernet.localIP ());
+            client.println (" -->");
+
             client.println (F (" </body></html>"));
             hasBeenDisplayed = true;
           }
