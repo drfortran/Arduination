@@ -174,6 +174,12 @@ void enAttente () {
             client.print (Ethernet.localIP ());
             client.println (" -->");
 
+            if (c == '2') {
+              client.print ("<!-- État:");
+              client.print (!lChambre);
+              client.println (" -->");
+            }
+
             client.println (F (" </body></html>"));
             hasBeenDisplayed = true;
           }
