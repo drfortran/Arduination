@@ -103,7 +103,7 @@ void enAttente () {
             digitalWrite (in1, lChambre);
             break;
           case '2':
-            Serial.print (F ("Variable lChambre"));
+            Serial.print (F ("Variable lChambre "));
             Serial.println (lChambre);
             Serial.print (F ("État : "));
             if (lChambre == 0) {
@@ -136,9 +136,12 @@ void enAttente () {
             client.println (F ("    </style>"));
             client.println (F ("  </head>"));
             client.println (F (" <body>"));
-            client.println (F ("    <button class=\"button\" onclick=\"window.location.href = 'http://192.168.9.179/?0';\">ETEINDRE</button>"));
-            client.println (F ("    <button class=\"button\" onclick=\"window.location.href = 'http://192.168.9.179/?1';\">ALLUMER</button>"));
-            client.println (F ("    <button class=\"button\" onclick=\"window.location.href = 'http://192.168.9.179/?2';\">AFFICHER</button>"));
+            client.print   (F ("    <button class=\"button\" onclick=\"window.location.href = 'http://"));
+            client.print   (Ethernet.localIP ()); client.println (F("/?0';\">ETEINDRE</button>"));
+            client.print   (F ("    <button class=\"button\" onclick=\"window.location.href = 'http://"));
+            client.print   (Ethernet.localIP ()); client.println (F("/?1';\">ALLUMER</button>"));
+            client.print   (F ("    <button class=\"button\" onclick=\"window.location.href = 'http://"));
+            client.print   (Ethernet.localIP ()); client.println (F("/?2';\">AFFICHER</button>"));
             client.println (F ("<div>   État</div>"));
 
             if (lChambre == 0) {
