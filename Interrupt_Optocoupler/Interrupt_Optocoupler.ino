@@ -15,8 +15,8 @@ DS3231M_Class DS3231M;                          ///< Create an instance of the D
 #define PIN_ETH_SPI   10
 
 const uint32_t SERIAL_SPEED        = 9600; ///< Set the baud rate for Serial I/O
-const uint8_t  SPRINTF_BUFFER_SIZE =   85; ///< Buffer size for snprintf ()
-const char     format[] PROGMEM    = { "%1d ; %10lu ; %10lu ; %10lu ; %10ld ; %10ld ; %10ld" };
+const uint8_t  SPRINTF_BUFFER_SIZE =   86; ///< Buffer size for snprintf ()
+const char     format[] PROGMEM    = { "%1d ; %10lu ; %10lu ; %10lu ; %10ld ; %10ld ; %10ld\n" };
 
 // pin definitions
 int optoPin = 2;
@@ -133,7 +133,7 @@ void loop () {
       snprintf_P (outputBuffer, SPRINTF_BUFFER_SIZE, format,
                 1, Start_Time, Start_Milli, Start_Micro,
                 (Start_Time-Stop_Time), (Start_Milli-Stop_Milli), (Start_Micro-Stop_Micro));
-      Serial.println (outputBuffer);
+      Serial.print (outputBuffer);
       LogData (outputBuffer);
 
       lastOptoState = 0;    //record the lastButtonState
