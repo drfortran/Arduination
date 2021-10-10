@@ -36,6 +36,9 @@ int     unsigned long Stop_Milli = 0;
 
 int debounceTime = 40;
 
+void ISR_button ();
+void LogData (char* logLine);
+
 void setup () {
   // deselect Ethernet chip on SPI bus
   pinMode (PIN_ETH_SPI, OUTPUT);
