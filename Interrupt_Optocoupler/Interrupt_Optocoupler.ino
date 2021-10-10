@@ -56,9 +56,30 @@ void setup () {
   Serial.print (micros ());
   Serial.println (F (" µs"));
   Serial.println (F ("Starting program"));
-  Serial.println (F ("- Built with C++ version " __VERSION__));
-  Serial.println (F ("- On " __DATE__ " at " __TIME__));
-  Serial.println (F ("- On " __TIMESTAMP__));
+  Serial.println (F ("- Built on " __DATE__ " at " __TIME__ " with"));
+  const String str_compiler_version PROGMEM = F ("compiler_version:" __VERSION__);
+  Serial.print(str_compiler_version);
+
+#ifdef CPP_PATH
+  const String str_compiler_path PROGMEM = F ("compiler_path:" CPP_PATH);
+  Serial.print(str_compiler_path);
+#endif
+
+#ifdef VERSION
+  const String str_version PROGMEM = F ("source_version:" VERSION);
+  Serial.print(str_version);
+#endif
+
+#ifdef LASTDATE
+  const String str_lastdate PROGMEM = F ("source_lastdate:" LASTDATE);
+  Serial.print(str_lastdate);
+#endif
+
+#ifdef __TIMESTAMPISO__
+  const String str___timestampiso__ PROGMEM = F ("build_timestamp:" __TIMESTAMPISO__);
+  Serial.print(str___timestampiso__);
+#endif
+
 
   // setup pin mode
   pinMode (optoPin, INPUT);
