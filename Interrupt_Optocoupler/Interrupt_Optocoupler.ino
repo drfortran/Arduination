@@ -58,28 +58,27 @@ void setup () {
   Serial.println (F ("Starting program"));
   Serial.println (F ("- Built on " __DATE__ " at " __TIME__ " with"));
   const String str_compiler_version PROGMEM = F ("compiler_version:" __VERSION__);
-  Serial.print(str_compiler_version);
+  Serial.println(str_compiler_version);
 
 #ifdef CPP_PATH
   const String str_compiler_path PROGMEM = F ("compiler_path:" CPP_PATH);
-  Serial.print(str_compiler_path);
+  Serial.println(str_compiler_path);
 #endif
 
 #ifdef VERSION
   const String str_version PROGMEM = F ("source_version:" VERSION);
-  Serial.print(str_version);
+  Serial.println(str_version);
 #endif
 
 #ifdef LASTDATE
   const String str_lastdate PROGMEM = F ("source_lastdate:" LASTDATE);
-  Serial.print(str_lastdate);
+  Serial.println(str_lastdate);
 #endif
 
 #ifdef __TIMESTAMPISO__
   const String str___timestampiso__ PROGMEM = F ("build_timestamp:" __TIMESTAMPISO__);
-  Serial.print(str___timestampiso__);
+  Serial.println(str___timestampiso__);
 #endif
-
 
   // setup pin mode
   pinMode (optoPin, INPUT);
@@ -124,7 +123,9 @@ void loop () {
     lastPress = millis ();   //update lastPress
     long unsigned int deltaPress= lastPress - nextToLastPress;
     if (digitalRead (optoPin) == 0 && lastOptoState == 1) {  // if button is pressed and was released last change
+#ifndef NO_RTC
       Start_Time  = RTC_Time;
+#endif
       Start_Milli = Ard_Milli;
       Start_Micro = lastOpto;
 
@@ -138,7 +139,9 @@ void loop () {
       lastOptoState = 0;    //record the lastButtonState
     }
     else if (digitalRead (optoPin) == 1 && lastOptoState == 0) {  // if button is not pressed, and was pressed last change
+#ifndef NO_RTC
       Stop_Time   = RTC_Time;
+#endif
       Stop_Milli  = Ard_Milli;
       Stop_Micro  = lastOpto;
 

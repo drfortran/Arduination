@@ -6,6 +6,7 @@ CFLAGS += -std=gnu99
 #CPPFLAGS += -O3 -DVERSION=\"$(shell LC_ALL=C hg tip --template '{rev}'|sed -e 's/ //')\" -DVERSIONPLUS=\"$(shell LC_ALL=C \( hg identify -n ; echo -n ":" ; hg identify --id \)| tr -d "\n")\" -DLASTDATE=\"$(shell LC_ALL=C hg tip --template '{date|isodate}'|sed -e 's/ /T/'|sed -e 's/ //')\" -D__TIMESTAMPISO__=\"$(shell date +%Y-%m-%dT%H:%M:%S.%NZ)\" -DCPP_VERSION=\"$(shell LC_ALL=C $(CXX) -dumpversion)\" -DCPP_PATH=\"$(shell LC_ALL=C which $(CXX))\"
 
 CPPFLAGS += -O3 -DVERSION=\"$(shell LC_ALL=C hg tip --template '{rev}' ; echo -n ":" ; hg identify --id)\" -DLASTDATE=\"$(shell LC_ALL=C hg tip --template '{date|isodate}'|sed -e 's/ /T/'|sed -e 's/ //')\" -D__TIMESTAMPISO__=\"$(shell date +%Y-%m-%dT%H:%M:%S.%NZ)\" -DCPP_VERSION=\"$(shell LC_ALL=C $(CXX) -dumpversion)\" -DCPP_PATH=\"$(shell LC_ALL=C which $(CXX))\"
+CPPFLAGS += -DNO_RTC
 
 include /usr/share/arduino/Arduino.mk
 
