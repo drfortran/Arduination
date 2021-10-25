@@ -170,9 +170,9 @@ void enAttente () {
             const String str___timestampiso__ PROGMEM = F ("<!-- build_timestamp:" __TIMESTAMPISO__ " -->");
             client.println(str___timestampiso__);
 #endif
-            client.print ("<!-- IP_address:");
+            client.print (F ("<!-- IP_address:"));
             client.print (Ethernet.localIP ());
-            client.println (" -->");
+            client.println (F (" -->"));
 
             if (c == '2') {
               client.print ("<!-- État:");
