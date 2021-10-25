@@ -174,6 +174,10 @@ void enAttente () {
             client.print (Ethernet.localIP ());
             client.println (F (" -->"));
 
+            client.print (F ("<!-- up: "));
+            client.print (millis ());
+            client.println (F (" ms -->"));
+
             if (c == '2') {
               client.print ("<!-- État:");
               client.print (!lChambre);
