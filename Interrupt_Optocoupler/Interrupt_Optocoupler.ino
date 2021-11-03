@@ -1,5 +1,6 @@
 #include <SPI.h>
 #include <SD.h>
+#include <EthernetUdp.h>
 #ifndef NO_RTC
 #include <DS3231M.h> // Include the DS3231M RTC library
 #endif
@@ -13,6 +14,8 @@ DS3231M_Class DS3231M;                          ///< Create an instance of the D
 
 // pin used for Ethernet chip SPI chip select
 #define PIN_ETH_SPI   10
+// pin used for SD chip SPI chip select
+#define PIN_SD_SPI     4
 
 const uint32_t SERIAL_SPEED        = 9600; ///< Set the baud rate for Serial I/O
 const uint8_t  SPRINTF_BUFFER_SIZE =   86; ///< Buffer size for snprintf ()
@@ -36,6 +39,19 @@ int     unsigned long Stop_Milli = 0;
 
 int debounceTime = 20; // in ms
 
+// ---- ETHERNET
+// Enter a MAC address and IP address for your controller below.
+// The IP address will be dependent on your local network:
+byte mac[] = {
+  0xAB, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
+IPAddress ip (192,168,9,184);
+
+EthernetUDP udp;
+// the IP address of your InfluxDB host
+byte host[] = {192, 168, 9, 4}; // volumio.local
+// the port that the UDP plugin is listening on; InfluxDB relies on 8089
+int port = 8789;
+
 void LogData (char* logLine);
 
 void ISR_button ()
@@ -45,11 +61,23 @@ void ISR_button ()
   lastOpto = micros ();
 }
 
+void udp_shout (String s) {
+  udp.beginPacket (host, port);
+  udp.print (s);
+  udp.endPacket ();
+}
+
 void setup () {
+#ifdef NO_ETHERNET
   // deselect Ethernet chip on SPI bus
   pinMode (PIN_ETH_SPI, OUTPUT);
   digitalWrite (PIN_ETH_SPI, HIGH);
-  pinMode(LED_BUILTIN, OUTPUT);
+#else
+  // disable SD SPI
+  pinMode (PIN_SD_SPI, OUTPUT);
+  digitalWrite (PIN_SD_SPI, HIGH);
+#endif
+  pinMode (LED_BUILTIN, OUTPUT);
 
   // Open serial communications and wait for port to open:
   Serial.begin (SERIAL_SPEED);
@@ -92,7 +120,8 @@ void setup () {
   lastOptoState = digitalRead (optoPin);
   attachInterrupt (digitalPinToInterrupt (optoPin), ISR_button, CHANGE);
 
-  if (!SD.begin (4)) {
+#ifdef NO_ETHERNET
+  if (!SD.begin (PIN_SD_SPI)) {
     Serial.println (F ("SD card initialization failed! Things to check:"));
     Serial.println (F ("1. is a card inserted?"));
     Serial.println (F ("2. is your wiring correct?"));
@@ -100,6 +129,27 @@ void setup () {
     Serial.println (F ("Note: press reset or reopen this serial monitor after fixing your issue!"));
     return;  // SD card initialization failed
   }
+#else
+  Ethernet.init (PIN_ETH_SPI);  // Most Arduino shields
+  // start the Ethernet
+  Ethernet.begin (mac, ip);
+  // Check for Ethernet hardware present
+  if (Ethernet.hardwareStatus () == EthernetNoHardware) {
+    Serial.println ("Ethernet shield was not found.  Sorry, can't run without hardware. :(");
+    while (true) {
+      delay (1); // do nothing, no point running without Ethernet hardware
+    }
+  }
+  if (Ethernet.linkStatus () == LinkOFF) {
+    Serial.println ("Ethernet cable is not connected.");
+  }
+
+  // start UDP
+  udp.begin (port);
+  Serial.print (F ("Arduino connecte: "));
+  Serial.print (F ("server is at "));
+  Serial.println (Ethernet.localIP ());
+#endif
 
 #ifndef NO_RTC
   // Initialize communications with the RTC
@@ -144,7 +194,11 @@ void loop () {
                 1, Start_Time, Start_Milli, Start_Micro,
                 (Start_Time-Stop_Time), (Start_Milli-Stop_Milli), (Start_Micro-Stop_Micro));
       Serial.print (outputBuffer);
+#ifdef NO_ETHERNET
       LogData (outputBuffer);
+#else
+      udp_shout (String (outputBuffer));
+#endif
 
       lastOptoState = 0;    //record the lastButtonState
     }
@@ -160,7 +214,11 @@ void loop () {
                 0, Stop_Time, Stop_Milli, Stop_Micro,
                 (Stop_Time-Start_Time), (Stop_Milli-Start_Milli), (Stop_Micro-Start_Micro));
       Serial.println (outputBuffer);
+#ifdef NO_ETHERNET
       LogData (outputBuffer);
+#else
+      udp_shout (outputBuffer);
+#endif
 
       lastOptoState = 1;    //record the lastButtonState
     }
