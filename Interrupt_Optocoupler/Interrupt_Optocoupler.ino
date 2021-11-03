@@ -34,15 +34,22 @@ int     unsigned long Stop_Micro = 0;
 int     unsigned long Start_Milli = 0;
 int     unsigned long Stop_Milli = 0;
 
-int debounceTime = 40;
+int debounceTime = 20; // in ms
 
-void ISR_button ();
 void LogData (char* logLine);
+
+void ISR_button ()
+{
+  optoFlag = 1;
+  nextToLastOpto = lastOpto;
+  lastOpto = micros ();
+}
 
 void setup () {
   // deselect Ethernet chip on SPI bus
   pinMode (PIN_ETH_SPI, OUTPUT);
   digitalWrite (PIN_ETH_SPI, HIGH);
+  pinMode(LED_BUILTIN, OUTPUT);
 
   // Open serial communications and wait for port to open:
   Serial.begin (SERIAL_SPEED);
@@ -82,6 +89,7 @@ void setup () {
 
   // setup pin mode
   pinMode (optoPin, INPUT);
+  lastOptoState = digitalRead (optoPin);
   attachInterrupt (digitalPinToInterrupt (optoPin), ISR_button, CHANGE);
 
   if (!SD.begin (4)) {
@@ -111,10 +119,12 @@ void loop () {
   char          outputBuffer[SPRINTF_BUFFER_SIZE]; ///< Buffer for snprintf ()
   unsigned long Ard_Milli = millis ();
   long unsigned int delta = Ard_Milli - lastPress;
-  if (delta > debounceTime && optoFlag) {
+  uint8_t pinStatus = digitalRead (optoPin);
+  digitalWrite(LED_BUILTIN, pinStatus);   // turn the LED on (HIGH is the voltage level)
+  //Serial.println (pinStatus);   // turn the LED on (HIGH is the voltage level)
+  if (delta > debounceTime && (optoFlag == 1)) {
 #ifndef NO_RTC
     DateTime RTC_now = DS3231M.now (); // get the current time
-    optoFlag = 0;
     unsigned long RTC_Time = RTC_now.unixtime ();
 #endif
     optoFlag = 0;
@@ -156,13 +166,6 @@ void loop () {
     }
     optoFlag = 0;
   }
-}
-
-void ISR_button ()
-{
-  optoFlag = 1;
-  nextToLastOpto = lastOpto;
-  lastOpto = micros ();
 }
 
 void LogData (char* logLine)
