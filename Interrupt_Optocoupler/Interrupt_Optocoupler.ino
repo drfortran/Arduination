@@ -18,8 +18,8 @@ DS3231M_Class DS3231M;                          ///< Create an instance of the D
 #define PIN_SD_SPI     4
 
 const uint32_t SERIAL_SPEED        = 9600; ///< Set the baud rate for Serial I/O
-const uint8_t  SPRINTF_BUFFER_SIZE =   86; ///< Buffer size for snprintf ()
-const char     format[] PROGMEM    = { "%1d ; %10lu ; %10lu ; %10lu ; %10ld ; %10ld ; %10ld\n" };
+const uint8_t  SPRINTF_BUFFER_SIZE =  199; ///< Buffer size for snprintf ()
+const char     format[] PROGMEM    = { "optoburner,device=arduino05 current_status=%d,stop_second=%lu,stop_milli=%lu,stop_micro=%lu,duration_second=%ld,duration_milli=%ld,duration_micro=%ld\n" };
 
 // pin definitions
 int optoPin = 2;
@@ -50,7 +50,7 @@ EthernetUDP udp;
 // the IP address of your InfluxDB host
 byte host[] = {192, 168, 9, 4}; // volumio.local
 // the port that the UDP plugin is listening on; InfluxDB relies on 8089
-int port = 8789;
+int port = 8089;
 
 void LogData (char* logLine);
 
