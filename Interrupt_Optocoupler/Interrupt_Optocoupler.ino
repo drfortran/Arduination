@@ -1,6 +1,9 @@
 #include <SPI.h>
+#ifdef NO_ETHERNET
 #include <SD.h>
+#else
 #include <EthernetUdp.h>
+#endif
 #ifndef NO_RTC
 #include <DS3231M.h> // Include the DS3231M RTC library
 #endif
@@ -37,7 +40,8 @@ int     unsigned long Stop_Micro = 0;
 int     unsigned long Start_Milli = 0;
 int     unsigned long Stop_Milli = 0;
 
-int debounceTime = 20; // in ms
+const   unsigned int debounceTime = 20; // in ms
+const   unsigned long Duration_Milli_Min = 1;
 
 // ---- ETHERNET
 // Enter a MAC address and IP address for your controller below.
@@ -52,7 +56,7 @@ byte host[] = {192, 168, 9, 4}; // volumio.local
 // the port that the UDP plugin is listening on; InfluxDB relies on 8089
 int port = 8089;
 
-void LogData (char* logLine);
+void LogData (const char* logLine);
 
 void ISR_button ()
 {
@@ -115,7 +119,6 @@ void setup () {
   Serial.println(str___timestampiso__);
 #endif
 
-  // setup pin mode
   pinMode (optoPin, INPUT);
   lastOptoState = digitalRead (optoPin);
   attachInterrupt (digitalPinToInterrupt (optoPin), ISR_button, CHANGE);
@@ -193,12 +196,15 @@ void loop () {
       snprintf_P (outputBuffer, SPRINTF_BUFFER_SIZE, format,
                 1, Start_Time, Start_Milli, Start_Micro,
                 (Start_Time-Stop_Time), (Start_Milli-Stop_Milli), (Start_Micro-Stop_Micro));
+      if (abs (Start_Milli-Stop_Milli) > Duration_Milli_Min)
+      {
       Serial.print (outputBuffer);
 #ifdef NO_ETHERNET
-      LogData (outputBuffer);
+        LogData (outputBuffer);
 #else
-      udp_shout (String (outputBuffer));
+        udp_shout (String (outputBuffer));
 #endif
+      }
 
       lastOptoState = 0;    //record the lastButtonState
     }
@@ -213,12 +219,15 @@ void loop () {
       snprintf_P (outputBuffer, SPRINTF_BUFFER_SIZE, format,
                 0, Stop_Time, Stop_Milli, Stop_Micro,
                 (Stop_Time-Start_Time), (Stop_Milli-Start_Milli), (Stop_Micro-Start_Micro));
+      if (abs (Start_Milli-Stop_Milli) > Duration_Milli_Min)
+      {
       Serial.println (outputBuffer);
 #ifdef NO_ETHERNET
-      LogData (outputBuffer);
+        LogData (outputBuffer);
 #else
-      udp_shout (outputBuffer);
+        udp_shout (outputBuffer);
 #endif
+      }
 
       lastOptoState = 1;    //record the lastButtonState
     }
@@ -226,13 +235,13 @@ void loop () {
   }
 }
 
-void LogData (char* logLine)
+void LogData (const char* logLine)
 {
-  File logFile;                 // file to log data to
-
-  logFile = SD.open ("log.txt", FILE_WRITE);
+#ifdef NO_ETHERNET
+  File logFile = SD.open ("log.txt", FILE_WRITE);
   if (logFile) {
     logFile.print (logLine);
     logFile.close ();
   }
+#endif
 }
