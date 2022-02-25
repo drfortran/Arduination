@@ -7,10 +7,12 @@
   These sensors use I2C to communicate, 2 pins are required to  
   interface
  ****************************************************/
- 
+
+#include <ESP8266WiFi.h>
 #include <Arduino.h>
 #include <Wire.h>
 #include "Adafruit_SHT31.h"
+#include "password.h"
 
 bool enableHeater = false;
 uint8_t loopCnt = 0;
@@ -22,6 +24,7 @@ void setup() {
 
   while (!Serial)
     delay(10);     // will pause Zero, Leonardo, etc until serial console opens
+  Serial.println("USB initialised");
 
   Serial.println("SHT31 test");
   if (! sht31.begin(0x44)) {   // Set to 0x45 for alternate i2c addr
@@ -34,6 +37,19 @@ void setup() {
     Serial.println("ENABLED");
   else
     Serial.println("DISABLED");
+
+  WiFi.begin(SSID, PASSWORD);
+
+  Serial.println("Connecting");
+  while (WiFi.status() != WL_CONNECTED)
+    {
+      delay(500);
+      Serial.print(".");
+    }
+  Serial.println();
+
+  Serial.print("Connected, IP address: ");
+  Serial.println(WiFi.localIP());
 }
 
 
