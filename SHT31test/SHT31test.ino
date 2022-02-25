@@ -14,6 +14,9 @@
 #include "Adafruit_SHT31.h"
 #include "password.h"
 
+const char* ssid = SSID; //your WiFi Name
+const char* password = PASSWORD;  //Your Wifi Password
+
 bool enableHeater = false;
 uint8_t loopCnt = 0;
 
@@ -38,7 +41,7 @@ void setup() {
   else
     Serial.println("DISABLED");
 
-  WiFi.begin(SSID, PASSWORD);
+  WiFi.begin(ssid, password);
 
   Serial.println("Connecting");
   while (WiFi.status() != WL_CONNECTED)
