@@ -1,10 +1,10 @@
-/*************************************************** 
+/***************************************************
   This is an example for the SHT31-D Humidity & Temp Sensor
 
   Designed specifically to work with the SHT31-D sensor from Adafruit
   ----> https://www.adafruit.com/products/2857
 
-  These sensors use I2C to communicate, 2 pins are required to  
+  These sensors use I2C to communicate, 2 pins are required to
   interface
  ****************************************************/
 
@@ -17,12 +17,15 @@
 const char* ssid = SSID; //your WiFi Name
 const char* password = PASSWORD;  //Your Wifi Password
 
+WiFiServer server(80);
+
 bool enableHeater = false;
 uint8_t loopCnt = 0;
 
 Adafruit_SHT31 sht31 = Adafruit_SHT31();
 
-void setup() {
+void setup ()
+{
   Serial.begin(115200);
 
   while (!Serial)
@@ -53,22 +56,45 @@ void setup() {
 
   Serial.print("Connected, IP address: ");
   Serial.println(WiFi.localIP());
+  server.begin();
+  Serial.println("Server started");
+  Serial.print("Use this URL to connect: ");
+  Serial.print("http://");
+  Serial.print(WiFi.localIP());
+  Serial.println("/");
 }
 
+void loop ()
+{
+  WiFiClient client = server.available();
+  if (!client) {
+    return;
+  }
+  Serial.println("new client");
+  while(!client.available()){
+    delay(1);
+  }
+  String request = client.readStringUntil('\r');
+  Serial.println(request);
+  client.flush();
 
-void loop() {
   float t = sht31.readTemperature();
   float h = sht31.readHumidity();
 
+  String line = String("sensor,device=arduino01 temperature=" + String(t) + ",humidity=" + String(h));
+
+  Serial.println(line);
+  client.println("HTTP/1.1 200 OK\nContent-Type: text/html\n\n" + line);
+
   if (! isnan(t)) {  // check if 'is not a number'
     Serial.print("Temp *C = "); Serial.print(t); Serial.print("\t\t");
-  } else { 
+  } else {
     Serial.println("Failed to read temperature");
   }
-  
+
   if (! isnan(h)) {  // check if 'is not a number'
     Serial.print("Hum. % = "); Serial.println(h);
-  } else { 
+  } else {
     Serial.println("Failed to read humidity");
   }
 
