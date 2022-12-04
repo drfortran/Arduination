@@ -25,7 +25,7 @@
 #include <DallasTemperature.h>
 #include <NTPClient.h>
 #include <avr/wdt.h>
-#ifndef NO_RTC
+#ifdef NO_RTC
 #include <DS3231M.h> // Include the DS3231M RTC library
 #endif
 
@@ -37,14 +37,14 @@ const uint32_t SERIAL_SPEED        = 9600; ///< Set the baud rate for Serial I/O
 // The IP address will be dependent on your local network:
 byte mac[] = {
   0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
-IPAddress ip (192,168,9,182);
+IPAddress ip (192,168,9,177);
 
 // Initialize the Ethernet server library
 // with the IP address and port you want to use
 // (port 80 is default for HTTP):
 EthernetServer server (80);
 
-#ifndef NO_RTC
+#ifdef NO_RTC
 DS3231M_Class DS3231M;                          ///< Create an instance of the DS3231M Class
 #endif
 
@@ -72,6 +72,26 @@ int devicesFound = 0;
 	void printAddress (DeviceAddress deviceAddress);
 String stringPrintAddress (DeviceAddress deviceAddress);
 String printTemperature (DeviceAddress deviceAddress);
+
+float pressure (uint8_t sensor_id) {
+  const float range_in_Volt = 5.0;
+  const float offset_in_Volt = 0.47;
+  const float max_Voltage = 4.5;
+  const float range_in_PSI = 150.0;
+  const float PSI_per_bar = 14.503773773;
+  const float PSI_per_Pa = PSI_per_bar / 100000.0;
+  // const float PSI_per_Pa2 = 6894.7572932;
+  const float conversion_Volt_to_PSI = range_in_PSI / (max_Voltage - offset_in_Volt);
+  // put your main code here, to run repeatedly:
+
+  int sensorMeasure=analogRead (sensor_id);
+  float voltage = (sensorMeasure * range_in_Volt)/1024;
+  float pressure_PSI = (conversion_Volt_to_PSI * (voltage - offset_in_Volt));
+  // float pressure_pascal = (3.0 * (voltage - 0.47)) * 1e6;
+  float pressure_pascal = pressure_PSI / PSI_per_Pa;
+  return pressure_pascal;
+}
+
 void setup () {
   const String str_compiler_version PROGMEM = F ("compiler_version:" __VERSION__);
 #ifdef CPP_PATH
@@ -146,7 +166,7 @@ void setup () {
   Serial.print (F ("server is at "));
   Serial.println (Ethernet.localIP ());
 
-#ifndef NO_RTC
+#ifdef NO_RTC
   // Initialize communications with the RTC
   while (!DS3231M.begin ())
   {
@@ -201,7 +221,7 @@ void setup () {
   timeClient.update ();
   timeClient.setUpdateInterval (3600);
   delay (100);
-#ifndef NO_RTC
+#ifdef NO_RTC
     DS3231M.adjust (DateTime ((uint32_t) timeClient.getEpochTime ())); // Set to library compile Date/Time
     Serial.print (F ("Date/Time set to NTP time: "));
 #endif
@@ -261,7 +281,6 @@ void printData (DeviceAddress deviceAddress)
   server.print (",");
 }
 
-
 void loop () {
   wdt_reset ();
 
@@ -310,7 +329,7 @@ void loop () {
           String sent = "";
 
           unsigned long NTP_Time = timeClient.getEpochTime ();
-#ifndef NO_RTC
+#ifdef NO_RTC
           DateTime RTC_now = DS3231M.now (); // get the current time
           unsigned long RTC_Time = RTC_now.unixtime ();
           Serial.print ((String) RTC_Time);
@@ -337,6 +356,7 @@ void loop () {
             if (i != devicesFound - 1)
               sent += " ; ";
           }
+          sent += " ; " + (String) pressure (A8);
 
           client.println (sent);
           if (devicesFound == 0)
