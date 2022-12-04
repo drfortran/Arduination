@@ -81,7 +81,6 @@ void setup () {
   while (!Serial) {
     ; // wait for serial port to connect. Needed for Leonardo only
   }
-  //Serial.print ("Startup reason:");Serial.println (ESP.getResetReason ());
 
   // start the Ethernet connection and the server:
   // Ethernet.begin (mac, ip);
