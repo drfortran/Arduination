@@ -44,7 +44,7 @@ IPAddress ip (192,168,9,177);
 // (port 80 is default for HTTP):
 EthernetServer server (80);
 
-#ifdef NO_RTC
+#ifndef NO_RTC
 DS3231M_Class DS3231M;                          ///< Create an instance of the DS3231M Class
 #endif
 
@@ -166,7 +166,7 @@ void setup () {
   Serial.print (F ("server is at "));
   Serial.println (Ethernet.localIP ());
 
-#ifdef NO_RTC
+#ifndef NO_RTC
   // Initialize communications with the RTC
   while (!DS3231M.begin ())
   {
@@ -221,7 +221,7 @@ void setup () {
   timeClient.update ();
   timeClient.setUpdateInterval (3600);
   delay (100);
-#ifdef NO_RTC
+#ifndef NO_RTC
     DS3231M.adjust (DateTime ((uint32_t) timeClient.getEpochTime ())); // Set to library compile Date/Time
     Serial.print (F ("Date/Time set to NTP time: "));
 #endif
@@ -329,7 +329,7 @@ void loop () {
           String sent = "";
 
           unsigned long NTP_Time = timeClient.getEpochTime ();
-#ifdef NO_RTC
+#ifndef NO_RTC
           DateTime RTC_now = DS3231M.now (); // get the current time
           unsigned long RTC_Time = RTC_now.unixtime ();
           Serial.print ((String) RTC_Time);
