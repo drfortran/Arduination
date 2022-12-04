@@ -73,6 +73,19 @@ int devicesFound = 0;
 String stringPrintAddress (DeviceAddress deviceAddress);
 String printTemperature (DeviceAddress deviceAddress);
 void setup () {
+  const String str_compiler_version PROGMEM = F ("compiler_version:" __VERSION__);
+#ifdef CPP_PATH
+  const String str_compiler_path PROGMEM = F ("compiler_path:" CPP_PATH);
+#endif
+#ifdef VERSION
+  const String str_version PROGMEM = F ("source_version:" VERSION);
+#endif
+#ifdef LASTDATE
+  const String str_lastdate PROGMEM = F ("source_lastdate:" LASTDATE);
+#endif
+#ifdef __TIMESTAMPISO__
+  const String str___timestampiso__ PROGMEM = F ("build_timestamp:" __TIMESTAMPISO__);
+#endif
   // disable SD SPI
   pinMode (4,OUTPUT);
   digitalWrite (4,HIGH);
@@ -84,6 +97,26 @@ void setup () {
   while (!Serial) {
     ; // wait for serial port to connect. Needed for Leonardo only
   }
+  Serial.print (F ("Multi thermal measurement control over the Web:"));
+  Serial.println (F ("Starting program"));
+  Serial.println (F ("- Built on " __DATE__ " at " __TIME__ " with"));
+  Serial.print(str_compiler_version);
+
+#ifdef CPP_PATH
+  Serial.print(str_compiler_path);
+#endif
+
+#ifdef VERSION
+  Serial.print(str_version);
+#endif
+
+#ifdef LASTDATE
+  Serial.print(str_lastdate);
+#endif
+
+#ifdef __TIMESTAMPISO__
+  Serial.print(str___timestampiso__);
+#endif
 
   // start the Ethernet connection and the server:
   // Ethernet.begin (mac, ip);
