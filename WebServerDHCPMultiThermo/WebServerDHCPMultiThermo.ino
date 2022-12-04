@@ -69,6 +69,9 @@ DallasTemperature sensors (&oneWire);
 DeviceAddress devices[10];
 int devicesFound = 0;
 
+	void printAddress (DeviceAddress deviceAddress);
+String stringPrintAddress (DeviceAddress deviceAddress);
+String printTemperature (DeviceAddress deviceAddress);
 void setup () {
   // disable SD SPI
   pinMode (4,OUTPUT);
