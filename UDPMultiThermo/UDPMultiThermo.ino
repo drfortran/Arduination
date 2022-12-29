@@ -21,9 +21,11 @@ static constexpr auto delay_between_measurement_ms = 1000U *
 #ifdef DEBUG
   2U
 #else
-  600U
+  60U
 #endif
 ;
+
+static uint32_t last_uptime_ms = 0U;
 
 // ---- ETHERNET
 
@@ -251,31 +253,34 @@ void loop () {
   }
   sensors.requestTemperatures ();
 
-  String sent = "thermometer_wc,device=arduino02 current_uptime_s=";
-  unsigned long currentUpTime_ms = millis ();
-  sent += (String) (currentUpTime_ms/1000) + '.' + (String) (currentUpTime_ms%1000) + ',';
-  for (uint8_t i = 0U; i < devicesFound; ++i)
+  unsigned long current_uptime_ms = millis ();
+  if (current_uptime_ms - last_uptime_ms > delay_between_measurement_ms)
   {
-    sent += stringPrintAddress (devices[i]) + '=' + printTemperature (devices[i]);
-    if (i != devicesFound - 1)
-       sent += ',';
-  }
-  uint16_t pressure_sensor_raw = (uint16_t) analogRead (PIN_ANALOG_PRESSURE);
-  float pressure_bar = pressure_converter_Pa (pressure_sensor_raw) / 100000.;
-  sent += ",pressure_raw=" + (String) pressure_sensor_raw;
-  sent += ",pressure_bar=" + (String) pressure_bar;
+     String sent = "thermometer_wc,device=arduino02 current_uptime_s=";
+     sent += (String) (current_uptime_ms/1000) + '.' + (String) (current_uptime_ms%1000) + ',';
+     for (uint8_t i = 0U; i < devicesFound; ++i)
+     {
+       sent += stringPrintAddress (devices[i]) + '=' + printTemperature (devices[i]);
+       if (i != devicesFound - 1)
+          sent += ',';
+     }
+     uint16_t pressure_sensor_raw = (uint16_t) analogRead (PIN_ANALOG_PRESSURE);
+     float pressure_bar = pressure_converter_Pa (pressure_sensor_raw) / 100000.;
+     sent += ",pressure_raw=" + (String) pressure_sensor_raw;
+     sent += ",pressure_bar=" + (String) pressure_bar;
 
 #ifdef DEBUG
-  Serial.println (sent);
+     Serial.println (sent);
 #endif
-  udp_shout (sent);
+     udp_shout (sent);
 
-  // const uint8_t  SPRINTF_BUFFER_SIZE =  199; ///< Buffer size for snprintf ()
-  // snprintf_P (outputBuffer, SPRINTF_BUFFER_SIZE, format,
-  //             1, Start_Time, Start_Milli, Start_Micro,
-  //             (Start_Time-Stop_Time), (Start_Milli-Stop_Milli), (Start_Micro-Stop_Micro));
-  //    Serial.print (outputBuffer);
-  //    udp_shout (String (outputBuffer));
+  //    const uint8_t  SPRINTF_BUFFER_SIZE =  199; ///< Buffer size for snprintf ()
+  //    snprintf_P (outputBuffer, SPRINTF_BUFFER_SIZE, format,
+  //                1, Start_Time, Start_Milli, Start_Micro,
+  //                (Start_Time-Stop_Time), (Start_Milli-Stop_Milli), (Start_Micro-Stop_Micro));
+  //       Serial.print (outputBuffer);
+  //       udp_shout (String (outputBuffer));
   // give the web browser time to receive the data
-  delay (delay_between_measurement_ms);
+     last_uptime_ms = current_uptime_ms;
+  }
 }
