@@ -11,7 +11,7 @@ syntax: glob
 *.so
 *.dll
 *.exe
-build
+build*
 dist
 *.zip
 \#*\#
@@ -21,6 +21,8 @@ dist
 libraries
 *.tbz
 *.xz
+*.csv
+*.ods
 
 # Default ignored files
 .idea/workspace.xml
