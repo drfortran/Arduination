@@ -21,7 +21,7 @@ static constexpr auto delay_between_measurement_ms = 1000U *
 #ifdef DEBUG
   2U
 #else
-  60U
+  600U
 #endif
 ;
 
