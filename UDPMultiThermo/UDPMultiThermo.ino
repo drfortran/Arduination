@@ -14,9 +14,16 @@
 // pin used for water pressure measurement
 #define PIN_ANALOG_PRESSURE     A0
 
-const uint32_t SERIAL_SPEED        = 9600U; ///< Set the baud rate for Serial I/O
-static constexpr uint8_t  SPRINTF_BUFFER_SIZE =  199U; ///< Buffer size for snprintf ()
-static constexpr char     format[] PROGMEM    = { "thermometer,device=arduino02 current_status=%d,stop_second=%lu,stop_milli=%lu,stop_micro=%lu,duration_second=%ld,duration_milli=%ld,duration_micro=%ld\n" };
+static constexpr uint32_t SERIAL_SPEED        = 9600U; ///< Set the baud rate for Serial I/O
+// static constexpr uint8_t  SPRINTF_BUFFER_SIZE =  199U; ///< Buffer size for snprintf ()
+// static constexpr char     format[] PROGMEM    = { "thermometer_wc,device=arduino02 current_uptime_s=%f,%s=%f,pressure_raw=%lu,pressure_bar=%f" };
+static constexpr auto delay_between_measurement_ms = 1000U *
+#ifdef DEBUG
+  2U
+#else
+  60U
+#endif
+;
 
 // ---- ETHERNET
 
@@ -73,7 +80,7 @@ float pressure_converter_Pa (uint16_t sensorMeasure) {
   static constexpr float conversion_Volt_to_PSI = range_in_PSI / (max_Voltage - offset_in_Volt);
   // put your main code here, to run repeatedly:
 
-  const float voltage = (sensorMeasure * range_in_Volt)/1024;
+  const float voltage = (sensorMeasure * range_in_Volt) / 1024;
   const float pressure_PSI = (conversion_Volt_to_PSI * (voltage - offset_in_Volt));
   // const float pressure_pascal = (3.0 * (voltage - 0.47)) * 1e6;
   const float pressure_pascal = pressure_PSI / PSI_per_Pa;
@@ -234,7 +241,7 @@ void printResolution (DeviceAddress deviceAddress)
 }
 
 void loop () {
-  char          outputBuffer[SPRINTF_BUFFER_SIZE]; ///< Buffer for snprintf ()
+  // char          outputBuffer[SPRINTF_BUFFER_SIZE]; ///< Buffer for snprintf ()
   wdt_reset ();
 
   if (devicesFound == 0)
@@ -244,7 +251,6 @@ void loop () {
   }
   sensors.requestTemperatures ();
 
-  // String sent = "thermometer_wc,device=arduino02 current_timestamp_ms=";
   String sent = "thermometer_wc,device=arduino02 current_uptime_s=";
   unsigned long currentUpTime_ms = millis ();
   sent += (String) (currentUpTime_ms/1000) + '.' + (String) (currentUpTime_ms%1000) + ',';
@@ -255,7 +261,7 @@ void loop () {
        sent += ',';
   }
   uint16_t pressure_sensor_raw = (uint16_t) analogRead (PIN_ANALOG_PRESSURE);
-  float pressure_bar = pressure_converter_Pa (pressure_sensor_raw)/100000.;
+  float pressure_bar = pressure_converter_Pa (pressure_sensor_raw) / 100000.;
   sent += ",pressure_raw=" + (String) pressure_sensor_raw;
   sent += ",pressure_bar=" + (String) pressure_bar;
 
@@ -265,12 +271,11 @@ void loop () {
   udp_shout (sent);
 
   // const uint8_t  SPRINTF_BUFFER_SIZE =  199; ///< Buffer size for snprintf ()
-  // const char     format[] PROGMEM    = { "thermometer,device=arduino02 current_status=%d,stop_second=%lu,stop_milli=%lu,stop_micro=%lu,duration_second=%ld,duration_milli=%ld,duration_micro=%ld\n" };
   // snprintf_P (outputBuffer, SPRINTF_BUFFER_SIZE, format,
   //             1, Start_Time, Start_Milli, Start_Micro,
   //             (Start_Time-Stop_Time), (Start_Milli-Stop_Milli), (Start_Micro-Stop_Micro));
   //    Serial.print (outputBuffer);
   //    udp_shout (String (outputBuffer));
   // give the web browser time to receive the data
-  delay (2000);
+  delay (delay_between_measurement_ms);
 }
