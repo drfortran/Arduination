@@ -11,6 +11,8 @@
 #define PIN_ETH_SPI   10
 // pin used for SD chip SPI chip select
 #define PIN_SD_SPI     4
+// pin used for water pressure measurement
+#define PIN_ANALOG_PRESSURE     A0
 
 const uint32_t SERIAL_SPEED        = 9600U; ///< Set the baud rate for Serial I/O
 static constexpr uint8_t  SPRINTF_BUFFER_SIZE =  199U; ///< Buffer size for snprintf ()
@@ -26,11 +28,11 @@ static const IPAddress ip (192,168,9,186);
 
 EthernetUDP udp;
 // the IP address of your InfluxDB host
-// static constexpr byte host[] = {192, 168, 9, 4}; // cool.local
-static constexpr byte host[] = {192, 168, 9, 23}; // serval.local
+// static constexpr byte host[] = {192, 168, 9, 23}; // serval.local
+static constexpr byte host[] = {192, 168, 9, 4}; // cool.local
 // the port that the UDP plugin is listening on; InfluxDB relies on 8089
-// static constexpr size_t port = 8089; // influxDb port
-static constexpr size_t port = 8099; // dummy port
+// static constexpr size_t port = 8099; // dummy port
+static constexpr size_t port = 8089; // influxDb port
 
 // ---- ONE WIRE
 /* Broche du bus 1-Wire */
@@ -54,28 +56,27 @@ String printTemperature (DeviceAddress deviceAddress);
 
 void LogData (const char* logLine);
 
-void udp_shout (String s) {
+void udp_shout (String message) {
   udp.beginPacket (host, port);
-  udp.println (s);
+  udp.print (message); // don't use println!
   udp.endPacket ();
 }
 
-float pressure (uint8_t sensor_id) {
+float pressure_converter_Pa (uint16_t sensorMeasure) {
   static constexpr float range_in_Volt = 5.0;
   static constexpr float offset_in_Volt = 0.47;
   static constexpr float max_Voltage = 4.5;
-  static constexpr float range_in_PSI = 150.0;
+  static constexpr float range_in_PSI = 100.0;
   static constexpr float PSI_per_bar = 14.503773773;
   static constexpr float PSI_per_Pa = PSI_per_bar / 100000.0;
   // const float PSI_per_Pa2 = 6894.7572932;
   static constexpr float conversion_Volt_to_PSI = range_in_PSI / (max_Voltage - offset_in_Volt);
   // put your main code here, to run repeatedly:
 
-  int sensorMeasure=analogRead (sensor_id);
-  float voltage = (sensorMeasure * range_in_Volt)/1024;
-  float pressure_PSI = (conversion_Volt_to_PSI * (voltage - offset_in_Volt));
-  // float pressure_pascal = (3.0 * (voltage - 0.47)) * 1e6;
-  float pressure_pascal = pressure_PSI / PSI_per_Pa;
+  const float voltage = (sensorMeasure * range_in_Volt)/1024;
+  const float pressure_PSI = (conversion_Volt_to_PSI * (voltage - offset_in_Volt));
+  // const float pressure_pascal = (3.0 * (voltage - 0.47)) * 1e6;
+  const float pressure_pascal = pressure_PSI / PSI_per_Pa;
   return pressure_pascal;
 }
 
@@ -251,12 +252,16 @@ void loop () {
   {
     sent += stringPrintAddress (devices[i]) + '=' + printTemperature (devices[i]);
     if (i != devicesFound - 1)
-       sent += ",";
+       sent += ',';
   }
-  // sent += '\n';
-  // sent += " ; " + (String) pressure (A8);
+  uint16_t pressure_sensor_raw = (uint16_t) analogRead (PIN_ANALOG_PRESSURE);
+  float pressure_bar = pressure_converter_Pa (pressure_sensor_raw)/100000.;
+  sent += ",pressure_raw=" + (String) pressure_sensor_raw;
+  sent += ",pressure_bar=" + (String) pressure_bar;
 
+#ifdef DEBUG
   Serial.println (sent);
+#endif
   udp_shout (sent);
 
   // const uint8_t  SPRINTF_BUFFER_SIZE =  199; ///< Buffer size for snprintf ()
