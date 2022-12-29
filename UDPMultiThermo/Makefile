@@ -20,3 +20,17 @@ display: $(TARGET_ELF)
 # target: info - Display callable targets.
 info::
 	@egrep "^# target:" $(MAKEFILE_LIST)
+
+# target: validate_typo - check number of typo mistakes ridden files, by category.
+validate_typo: $(LOCAL_SRCS)
+	grep -Er '[[:alnum:]]\(' $^|wc  # glued parenthesis
+	grep -Er ',[[:alnum:]]'  $^|wc  # glued comma
+	grep -Er '\( +' $^|wc           # wrongly spaced parenthesis
+	grep -Er ' +\)' $^|wc           # wrongly spaced parenthesis
+	grep -Er ' +,'  $^|wc           # wrongly spaced comma
+	grep -r '	' $^|wc          # tabulation
+	grep -Er ' +$$'  $^|wc          # trailing white-space
+	grep -Er '	+$$'  $^|wc      # trailing tab
+	grep -Er '\)[[:alnum:]]' $^|wc  # glued parenthesis
+	grep -Er '\)[^[:blank:]\.,;\)\"\-]' $^|wc  # glued parenthesis
+	grep '.\{73\}' $^|wc          # any lines over 72 characters
