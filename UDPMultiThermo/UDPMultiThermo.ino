@@ -33,7 +33,6 @@ static uint32_t last_uptime_ms = 0U;
 // The IP address will be dependent on your local network:
 static constexpr byte mac[] = {
   0xCD, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
-static const IPAddress ip (192,168,9,186);
 
 EthernetUDP udp;
 // the IP address of your InfluxDB host
@@ -175,11 +174,15 @@ void setup () {
     sensors.setResolution (devices[i], TEMPERATURE_PRECISION);
 
   delay (1000);
-  // start the Ethernet connection:
-  Serial.println (F ("Initialize Ethernet without DHCP:"));
   Ethernet.init (PIN_ETH_SPI);  // Most Arduino shields
-  // start the Ethernet
-  Ethernet.begin (mac, ip);
+  // start the Ethernet connection:
+  if (Ethernet.begin (mac) == 0) {
+     Serial.println (F ("Initialize Ethernet without DHCP:"));
+     static const IPAddress ip (192,168,9,186);
+     Ethernet.begin (mac, ip);
+  }
+  else
+     Serial.println (F ("Initialize Ethernet with DHCP:"));
   // Check for Ethernet hardware present
   if (Ethernet.hardwareStatus () == EthernetNoHardware) {
     Serial.println ("Ethernet shield was not found.  Sorry, can't run without hardware. :(");
