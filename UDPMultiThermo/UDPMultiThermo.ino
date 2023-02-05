@@ -16,6 +16,7 @@
 #define PIN_ANALOG_PRESSURE     A7
 #else
 #define PIN_ANALOG_PRESSURE     A0
+#define PIN_ANALOG_PRESSURE_BOILER     A1
 #endif
 
 static constexpr uint32_t SERIAL_SPEED        = 9600U; ///< Set the baud rate for Serial I/O
@@ -296,11 +297,15 @@ void loop () {
        if (i != devicesFound - 1)
           sent += ',';
      }
-     uint16_t pressure_sensor_raw = (uint16_t) analogRead (PIN_ANALOG_PRESSURE);
-     float pressure_bar = pressure_converter_Pa (pressure_sensor_raw) / 100000.;
+     const uint16_t pressure_sensor_raw = (uint16_t) analogRead (PIN_ANALOG_PRESSURE);
+     const float pressure_bar = pressure_converter_Pa (pressure_sensor_raw) / 100000.;
      sent += ",pressure_raw=" + (String) pressure_sensor_raw;
      sent += ",pressure_bar=" + (String) pressure_bar;
 
+     const uint16_t pressure_sensor_boiler_raw = (uint16_t) analogRead (PIN_ANALOG_PRESSURE_BOILER);
+     const float pressure_boiler_bar = pressure_converter_Pa (pressure_sensor_boiler_raw) / 100000.;
+     sent += ",pressure_boiler_raw=" + (String) pressure_sensor_boiler_raw;
+     sent += ",pressure_boiler_bar=" + (String) pressure_boiler_bar;
 #ifdef DEBUG
      Serial.println (sent);
 #endif
