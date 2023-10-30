@@ -1,0 +1,10 @@
+sur le raspberry-pi
+LC_ALL=C USER_LIB_PATH=/home/pi/Arduino/libraries CPPFLAGS="-DGARAGE -I/usr/share/arduino/hardware/arduino/avr/cores/arduino -I/home/pi/Arduino/libraries/ArduinoJson/extras/tests/Helpers" make display
+LC_ALL=C USER_LIB_PATH=/home/pi/Arduino/libraries CPPFLAGS="-DGARAGE -I/usr/share/arduino/hardware/arduino/avr/cores/arduino -I/home/pi/Arduino/libraries/ArduinoJson/extras/tests/Helpers" make do_upload
+dpkg -l mercurial-git arduino-mk mercurial arduino avrdude
+
+sur serval
+LC_ALL=C USER_LIB_PATH=/home/lafage/Arduino/libraries ARDUINO_PLATFORM_LIB_PATH=/usr/share/arduino/hardware/arduino/avr/cores/arduino ARDUINO_LIB_PATH=/usr/share/arduino/hardware/arduino/avr/libraries CPPFLAGS="-DGARAGE -I/usr/share/arduino/hardware/arduino/avr/cores/arduino" make display
+
+sur cool
+LC_ALL=C USER_LIB_PATH="/home/mauricette/Arduino/libraries" ARDUINO_LIB_PATH='/opt/arduino-1.8.19/libraries' ARDUINO_PLATFORM_LIB_PATH='/opt/arduino-1.8.19/hardware/arduino/avr/libraries' CPPFLAGS="-DGARAGE -I/usr/share/arduino/hardware/arduino/avr/cores/arduino" make display

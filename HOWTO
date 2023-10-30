@@ -1,0 +1,19 @@
+Arduineries$ hg bookmark -r default master
+Arduineries$ hg push
+
+sudo netcat -ul 8089
+
+@cool:~$ influx -host 127.0.0.1 -port 8086
+Connected to http://127.0.0.1:8086 version 1.8.10
+InfluxDB shell version: 1.8.10
+> use arduino
+Using database arduino
+> precision rfc3339
+> show field keys
+> select * from optoburner;
+> select max(duration_milli) from optoburner where duration_milli < 1000;
+> select count(duration_milli) from optoburner where duration_milli < 1000;
+> select * from optoburner where duration_milli > 600;
+
+ssh -AX vincent@orimont.ddns.net ./report_fuel_burner_duration.sh
+ssh -AX vincent@orimont.ddns.net ./report_cuve_fuel_level_mm_burner_h.sh
